@@ -1,0 +1,1212 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dashboard Treinamentos HCM</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+
+  <!-- jsPDF para gerar o PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: "Segoe UI", Roboto, Arial, sans-serif;
+    }
+
+    body {
+      background: radial-gradient(circle at top, #182b3a 0, #050810 45%, #020308 100%);
+      color: #f5f7fb;
+      min-height: 100vh;
+    }
+
+    .page-wrapper {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 18px 10px 32px;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .logo-area {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-img {
+      height: 38px;
+      width: auto;
+      object-fit: contain;
+    }
+
+    .logo-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.2;
+    }
+
+    .logo-text-main {
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      font-size: 16px;
+    }
+
+    .logo-text-sub {
+      font-size: 11px;
+      color: #9ba7c7;
+      text-transform: uppercase;
+    }
+
+    .header-title-block {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      flex: 1;
+      min-width: 220px;
+    }
+
+    .header-kicker {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: #6cc5ff;
+    }
+
+    h1 {
+      font-size: 20px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .header-tag {
+      font-size: 10px;
+      color: #9ba7c7;
+      text-align: right;
+      min-width: 180px;
+    }
+
+    main {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 16px;
+      align-items: flex-start;
+    }
+
+    @media (max-width: 900px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+      .page-wrapper {
+        padding: 16px 10px 28px;
+      }
+    }
+
+    .panel {
+      background: rgba(7, 15, 30, 0.96);
+      border-radius: 18px;
+      padding: 14px 14px 16px;
+      box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.03),
+        0 20px 45px rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(16px);
+    }
+
+    .panel-title {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: #7dd8ff;
+      margin-bottom: 4px;
+    }
+
+    .panel-subtitle {
+      font-size: 11px;
+      color: #9ba7c7;
+      margin-bottom: 10px;
+    }
+
+    .modules-list {
+      max-height: 260px;
+      overflow-y: auto;
+      padding-right: 4px;
+      margin-bottom: 12px;
+    }
+
+    .modules-list::-webkit-scrollbar,
+    .routines-list::-webkit-scrollbar {
+      width: 6px;
+    }
+    .modules-list::-webkit-scrollbar-thumb,
+    .routines-list::-webkit-scrollbar-thumb {
+      background: rgba(140, 192, 255, 0.5);
+      border-radius: 999px;
+    }
+
+    .module-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: linear-gradient(90deg, #111827, #050814);
+      border-radius: 12px;
+      padding: 8px 10px 8px 8px;
+      margin-bottom: 6px;
+      border: 1px solid rgba(120, 180, 255, 0.24);
+    }
+
+    .module-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .module-checkbox {
+      width: 16px;
+      height: 16px;
+      accent-color: #3ddcff;
+      cursor: pointer;
+    }
+
+    .module-name {
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .module-pill {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(201, 229, 255, 0.4);
+      color: #cde7ff;
+      background: radial-gradient(circle at top, rgba(66, 201, 255, 0.25), transparent 60%);
+      white-space: nowrap;
+    }
+
+    .note {
+      font-size: 10px;
+      color: #7b8aaa;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+    }
+
+    .note-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: #3ddcff;
+      margin-top: 4px;
+    }
+
+    .inline-badge {
+      display: inline-block;
+      padding: 1px 6px;
+      border-radius: 999px;
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      background: rgba(6, 148, 162, 0.18);
+      border: 1px solid rgba(34, 211, 238, 0.4);
+      color: #a5f3fc;
+    }
+
+    .valor-hora-block {
+      margin-bottom: 10px;
+    }
+
+    .field-label {
+      font-size: 12px;
+      margin-bottom: 4px;
+    }
+
+    .valor-hora-input-wrapper {
+      background: #020617;
+      border-radius: 12px;
+      padding: 7px 10px;
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+    }
+
+    .valor-hora-input-wrapper span {
+      font-size: 11px;
+      color: #94a3b8;
+      padding: 3px 7px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.5);
+    }
+
+    .valor-hora-input {
+      flex: 1;
+      border: none;
+      outline: none;
+      background: transparent;
+      color: #e5e7eb;
+      font-size: 14px;
+      text-align: center;
+    }
+
+    .valor-hora-input::placeholder {
+      color: #64748b;
+    }
+
+    .totals-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 8px;
+      width: 100%;
+    }
+
+    .total-card {
+      background: radial-gradient(circle at top, rgba(15, 118, 255, 0.3), rgba(15, 23, 42, 0.95));
+      border-radius: 14px;
+      padding: 8px 10px 9px;
+      border: 1px solid rgba(148, 163, 184, 0.55);
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.8);
+    }
+
+    .total-card-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: #bfdbfe;
+      margin-bottom: 3px;
+    }
+
+    .total-card-main {
+      font-size: 17px;
+      font-weight: 700;
+    }
+
+    .total-card-sub {
+      font-size: 9px;
+      color: #cbd5f5;
+      margin-top: 2px;
+    }
+
+    .cost-card-wrapper {
+      width: 100%;
+      margin: 0 auto 8px;
+    }
+
+    .cost-card {
+      width: 100%;
+      background: radial-gradient(circle at top, rgba(45, 212, 191, 0.45), rgba(15, 23, 42, 0.96));
+      border-radius: 16px;
+      padding: 9px 10px 11px;
+      border: 1px solid rgba(45, 212, 191, 0.7);
+      box-shadow: 0 16px 40px rgba(15, 23, 42, 0.9);
+      text-align: center;
+    }
+
+    .cost-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: #a5f3fc;
+      margin-bottom: 3px;
+    }
+
+    .cost-value {
+      font-size: 20px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .generate-btn {
+      margin-top: 5px;
+      width: 100%;
+      padding: 9px 12px;
+      border-radius: 999px;
+      border: none;
+      background: linear-gradient(135deg, #22d3ee, #0ea5e9);
+      color: #020617;
+      font-weight: 600;
+      font-size: 12px;
+      cursor: pointer;
+      box-shadow: 0 12px 30px rgba(8, 145, 178, 0.7);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    .generate-btn:hover {
+      filter: brightness(1.05);
+      box-shadow: 0 14px 36px rgba(8, 145, 178, 0.85);
+    }
+
+    .scope-footer-info {
+      margin-top: 8px;
+      font-size: 10px;
+      color: #64748b;
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .routines-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 10px;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .routines-header-title {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: #7dd8ff;
+    }
+
+    .routines-header-subtitle {
+      font-size: 11px;
+      color: #9ba7c7;
+      max-width: 520px;
+    }
+
+    .routines-container {
+      border-radius: 14px;
+      background: #020617;
+      border: 1px solid rgba(148, 163, 184, 0.45);
+      overflow: hidden;
+    }
+
+    .routines-header-row {
+      display: grid;
+      grid-template-columns: 40px 160px 1fr 80px;
+      padding: 6px 10px;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      background: #020617;
+      color: #9ca3af;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.3);
+    }
+
+    .routines-list {
+      max-height: 420px;
+      overflow-y: auto;
+    }
+
+    .routine-row {
+      display: grid;
+      grid-template-columns: 40px 160px 1fr 80px;
+      padding: 7px 10px;
+      font-size: 12px;
+      align-items: center;
+      border-bottom: 1px solid rgba(30, 64, 175, 0.35);
+      background: linear-gradient(90deg, rgba(15, 23, 42, 0.96), rgba(15, 23, 42, 0.92));
+    }
+
+    .routine-row:nth-child(even) {
+      background: linear-gradient(90deg, rgba(15, 23, 42, 0.96), rgba(17, 24, 39, 0.94));
+    }
+
+    .routine-checkbox {
+      width: 14px;
+      height: 14px;
+      accent-color: #22c55e;
+      cursor: pointer;
+    }
+
+    .routine-module {
+      font-size: 11px;
+      color: #cbd5f5;
+    }
+
+    .routine-name {
+      font-size: 12px;
+    }
+
+    .routine-hours {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .badge-active {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10px;
+      border-radius: 999px;
+      padding: 2px 8px;
+      border: 1px solid rgba(52, 211, 153, 0.7);
+      background: rgba(16, 185, 129, 0.15);
+      color: #bbf7d0;
+      white-space: nowrap;
+    }
+
+    .badge-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: #4ade80;
+    }
+
+    @media (max-width: 700px) {
+      .routines-header-row,
+      .routine-row {
+        grid-template-columns: 32px 120px 1fr 70px;
+      }
+      .header-tag {
+        text-align: left;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-wrapper">
+    <header>
+      <div class="logo-area">
+        <img src="komvos_logo.png" alt="KOMVOS" class="logo-img" />
+        <div class="logo-text">
+          <span class="logo-text-main">KOMVOS</span>
+          <span class="logo-text-sub">Tecnologia que transforma</span>
+        </div>
+      </div>
+      <div class="header-title-block">
+        <span class="header-kicker">Dashboard Comercial · Treinamentos HCM</span>
+        <h1>Dashboard de Precificação HCM</h1>
+      </div>
+      <div class="header-tag">
+        <span>GitHub Pages · Versão responsiva</span>
+      </div>
+    </header>
+
+    <main>
+      <!-- PAINEL ESQUERDO -->
+      <section class="panel">
+        <div class="panel-title">Módulos</div>
+        <div class="panel-subtitle">
+          Marque um ou mais módulos. Todas as rotinas serão carregadas automaticamente para compor o escopo.
+        </div>
+
+        <div class="modules-list" id="modulesList"></div>
+
+        <div class="note">
+          <div class="note-dot"></div>
+          <div>
+            Cálculos feitos apenas no navegador. Nenhuma informação é enviada para servidores.
+            <span class="inline-badge">Uso interno Komvos</span>
+          </div>
+        </div>
+
+        <div class="valor-hora-block">
+          <div class="field-label">Valor hora base (R$):</div>
+          <div class="valor-hora-input-wrapper">
+            <span>R$</span>
+            <input
+              id="valorHoraInput"
+              class="valor-hora-input"
+              type="number"
+              step="0.01"
+              min="0"
+              value="199"
+            />
+          </div>
+        </div>
+
+        <div class="totals-grid">
+          <div class="total-card">
+            <div class="total-card-label">Horas totais</div>
+            <div id="totalHoras" class="total-card-main">0,00 h</div>
+            <div class="total-card-sub">Soma das rotinas no escopo</div>
+          </div>
+          <div class="total-card">
+            <div class="total-card-label">Módulos selecionados</div>
+            <div id="totalModulos" class="total-card-main">0</div>
+            <div class="total-card-sub">Quantidade de módulos no pacote</div>
+          </div>
+        </div>
+
+        <div class="cost-card-wrapper">
+          <div class="cost-card">
+            <div class="cost-label">Custo estimado</div>
+            <div id="custoEstimado" class="cost-value">R$ 0,00</div>
+          </div>
+        </div>
+
+        <button class="generate-btn" id="btnGerarPdf">
+          Gerar PDF do Escopo
+        </button>
+
+        <div class="scope-footer-info">
+          <span id="rotinasEscopoInfo">Rotinas no escopo: 0</span>
+          <span id="versaoTabelaInfo">Versão da Tabela: Treinamentos HCM</span>
+        </div>
+      </section>
+
+      <!-- PAINEL DIREITO -->
+      <section class="panel">
+        <div class="routines-header">
+          <div>
+            <div class="routines-header-title">Rotinas do escopo</div>
+            <div class="routines-header-subtitle">
+              Todas as rotinas dos módulos selecionados aparecem abaixo. Desmarque o checkbox para excluir a rotina e ajustar a carga horária.
+            </div>
+          </div>
+          <div class="badge-active">
+            <span class="badge-dot"></span>
+            <span>Escopo dinâmico</span>
+          </div>
+        </div>
+
+        <div class="routines-container">
+          <div class="routines-header-row">
+            <div>Escopo</div>
+            <div>Módulo</div>
+            <div>Rotina</div>
+            <div style="text-align:right;">Horas</div>
+          </div>
+          <div class="routines-list" id="routinesList"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    // ============================================================
+    // 1. COLE AQUI O CONTEÚDO DO SEU CSV (substitua o exemplo)
+    // ============================================================
+    const csvData = `
+MÓDULO;ROTINA;MÓDULO - ROTINA;ESPECIFICAÇÃO;HORAS;TOTAL ROTINA;TOTAL MÓDULO
+Administração de Pessoal;Tabelas;Administração de Pessoal — Tabelas;Treinamento Valores (Tabelas INSS, Tabela IRRF, Valores Gerais);0,50;4,00;68,00
+Administração de Pessoal;Tabelas;Administração de Pessoal — Tabelas;Treinamento Eventos (Tabela, Eventos, Regras Nativas, Base, Incidências e Exceções);0,50;4,00;68,00
+Administração de Pessoal;Tabelas;Administração de Pessoal — Tabelas;Ogranograma (Estrutura e Locais);0,50;4,00;68,00
+Administração de Pessoal;Tabelas;Administração de Pessoal — Tabelas;Treinamento Postos de Trabalho (Estrutura, Perfil, Cadastro Postos, Hierarquia de Postos, Adicionais, Infomrações Salariais);0,50;4,00;68,00
+Administração de Pessoal;Tabelas;Administração de Pessoal — Tabelas;Treinamento Sindicatos (Cadastro Geral e Normativos);0,50;4,00;68,00
+Administração de Pessoal;Tabelas;Administração de Pessoal — Tabelas;Treinamento Motivos (Causas Demissão, Motivos Reajuste Salarial, Motivos Demissão);0,50;4,00;68,00
+Administração de Pessoal;Tabelas;Administração de Pessoal — Tabelas;Treinamento Tabelas Gerais (Bancos, Cidades, Bairros, CEPs, Situações, Conselhos Profissionais, Vinculos, Graus de Instrução, Nacionalidades e Deficiências);0,50;4,00;68,00
+Administração de Pessoal;Tabelas;Administração de Pessoal — Tabelas;Treinamento Relatórios do Menu  Tabelas;0,50;4,00;68,00
+Administração de Pessoal;Empresas;Administração de Pessoal — Empresas;Treinamento Cadastro de Empresas;0,50;2,00;68,00
+Administração de Pessoal;Empresas;Administração de Pessoal — Empresas;Treinamento Cadastro de Filiais;0,50;2,00;68,00
+Administração de Pessoal;Empresas;Administração de Pessoal — Empresas;Treinamento Cadastro Outras Empresas;0,50;2,00;68,00
+Administração de Pessoal;Empresas;Administração de Pessoal — Empresas;Treinamento Grupo de Empresas;0,25;2,00;68,00
+Administração de Pessoal;Empresas;Administração de Pessoal — Empresas;Treinamento Relatórios Cadastrais e Gerenciais Empresas;0,25;2,00;68,00
+Administração de Pessoal;Pessoas;Administração de Pessoal — Pessoas;Treinamento Cadastro Pessoas;0,25;1,00;68,00
+Administração de Pessoal;Pessoas;Administração de Pessoal — Pessoas;Treinamento Gerar Pessoas;0,25;1,00;68,00
+Administração de Pessoal;Pessoas;Administração de Pessoal — Pessoas;Treinamento Consistir Pessoas;0,25;1,00;68,00
+Administração de Pessoal;Pessoas;Administração de Pessoal — Pessoas;Treinamento Excluir Pessoas;0,25;1,00;68,00
+Administração de Pessoal;Colaboradores;Administração de Pessoal — Colaboradores;Treinamento Ficha Cadastral;0,50;6,00;68,00
+Administração de Pessoal;Colaboradores;Administração de Pessoal — Colaboradores;Treinamento Ficha Complementar;0,50;6,00;68,00
+Administração de Pessoal;Colaboradores;Administração de Pessoal — Colaboradores;Treinamento Dependentes;0,50;6,00;68,00
+Administração de Pessoal;Colaboradores;Administração de Pessoal — Colaboradores;Treinamento Manutenção de Históricos;0,50;6,00;68,00
+Administração de Pessoal;Colaboradores;Administração de Pessoal — Colaboradores;Treinamento Pensão Judicial;0,50;6,00;68,00
+Administração de Pessoal;Colaboradores;Administração de Pessoal — Colaboradores;Treinamento Estagiários;0,50;6,00;68,00
+Administração de Pessoal;Colaboradores;Administração de Pessoal — Colaboradores;Treinamento Informações Admissionais;0,50;6,00;68,00
+Administração de Pessoal;Colaboradores;Administração de Pessoal — Colaboradores;Treinamento Cadastro Terceiros;0,50;6,00;68,00
+Administração de Pessoal;Colaboradores;Administração de Pessoal — Colaboradores;Treinamento Vinculação Fotos (individual e coletiva);0,50;6,00;68,00
+Administração de Pessoal;Colaboradores;Administração de Pessoal — Colaboradores;Treinamento Relatórios Relação de Cadastro;0,50;6,00;68,00
+Administração de Pessoal;Colaboradores;Administração de Pessoal — Colaboradores;Treinamento Relatórios Históricos;0,50;6,00;68,00
+Administração de Pessoal;Colaboradores;Administração de Pessoal — Colaboradores;Treinamento Relatório Dependentes e Pensão Judicial;0,50;6,00;68,00
+Administração de Pessoal;Estrutura Salarial;Administração de Pessoal — Estrutura Salarial;Treinamento Cadastro Estrutura Salarial;0,50;2,50;68,00
+Administração de Pessoal;Estrutura Salarial;Administração de Pessoal — Estrutura Salarial;Treinamento Reajuste Estrutura Salarial;0,50;2,50;68,00
+Administração de Pessoal;Estrutura Salarial;Administração de Pessoal — Estrutura Salarial;Treinamento Duplicação Estrutura Salarial;0,50;2,50;68,00
+Administração de Pessoal;Estrutura Salarial;Administração de Pessoal — Estrutura Salarial;Treinamento Relatórios Estrutura Salarial;0,50;2,50;68,00
+Administração de Pessoal;Estrutura Salarial;Administração de Pessoal — Estrutura Salarial;Treinamento Vinculação Estrutura Salrial em Cargos e Postos de Trabalho;0,50;2,50;68,00
+Administração de Pessoal;Salários;Administração de Pessoal — Salários;Treinamento Historico Salarial Individual;0,50;2,50;68,00
+Administração de Pessoal;Salários;Administração de Pessoal — Salários;Treinamento Lançamento Histórico Salarial;0,50;2,50;68,00
+Administração de Pessoal;Salários;Administração de Pessoal — Salários;Treinamento Reajuste Salarial Coletivo;0,50;2,50;68,00
+Administração de Pessoal;Salários;Administração de Pessoal — Salários;Treinamento Ajustar Salários (com Estrutura/Classe/Nível);0,50;2,50;68,00
+Administração de Pessoal;Salários;Administração de Pessoal — Salários;Treinamento Cancelar Reajustes Salariais;0,50;2,50;68,00
+Administração de Pessoal;Férias;Administração de Pessoal — Férias;Treinamento Períodos de Férias;0,50;4,00;68,00
+Administração de Pessoal;Férias;Administração de Pessoal — Férias;Treinamento Totalizadores de Férias (Cadastro e Acumular);0,50;4,00;68,00
+Administração de Pessoal;Férias;Administração de Pessoal — Férias;Treinamento Programação de Férias (Individual, Coletiva, Gerar e Excluir);0,50;4,00;68,00
+Administração de Pessoal;Férias;Administração de Pessoal — Férias;Treinamento Relatórios e Consultas Programação de Férias;0,50;4,00;68,00
+Administração de Pessoal;Férias;Administração de Pessoal — Férias;Treinamento Recibos Coletivos de Férias;0,50;4,00;68,00
+Administração de Pessoal;Férias;Administração de Pessoal — Férias;Treinamento Cálculo Recibo de Férias (Individual, Coletivo, Programadas, Exclusão e Alterar Gozo);1,00;4,00;68,00
+Administração de Pessoal;Férias;Administração de Pessoal — Férias;Treinamento Relatórios de Férias (Aviso, Recibo e Demonstrativo de Médias);0,50;4,00;68,00
+Administração de Pessoal;Rescisão;Administração de Pessoal — Rescisão;Treinamento Calcular Rescisão;1,00;6,00;68,00
+Administração de Pessoal;Rescisão;Administração de Pessoal — Rescisão;Treinar Rescisão Informada;0,50;6,00;68,00
+Administração de Pessoal;Rescisão;Administração de Pessoal — Rescisão;Treinar Recisão Coletiva;0,50;6,00;68,00
+Administração de Pessoal;Rescisão;Administração de Pessoal — Rescisão;Treinar Cadastro e Geração Aviso Prévio;0,50;6,00;68,00
+Administração de Pessoal;Rescisão;Administração de Pessoal — Rescisão;Treinamento de Programção de Rescisões;0,50;6,00;68,00
+Administração de Pessoal;Rescisão;Administração de Pessoal — Rescisão;Treinamento Cálculo de Rescisões Calculadas;0,50;6,00;68,00
+Administração de Pessoal;Rescisão;Administração de Pessoal — Rescisão;Treinamento Exclusão de Rescisão;0,25;6,00;68,00
+Administração de Pessoal;Rescisão;Administração de Pessoal — Rescisão;Treinamento Alteração de Rescisão;0,25;6,00;68,00
+Administração de Pessoal;Rescisão;Administração de Pessoal — Rescisão;Treinamento Rescisão Complementar;1,00;6,00;68,00
+Administração de Pessoal;Rescisão;Administração de Pessoal — Rescisão;Treinamento Relatórios Rescisão;1,00;6,00;68,00
+Administração de Pessoal;Cálculos;Administração de Pessoal — Cálculos;Treinar Criação de Cálculos;1,00;6,00;68,00
+Administração de Pessoal;Cálculos;Administração de Pessoal — Cálculos;Treinar Lançamentos Fixos (suas diversas formas);0,75;6,00;68,00
+Administração de Pessoal;Cálculos;Administração de Pessoal — Cálculos;Treinar Lançamentos Variáveis (suas diversas formas);0,75;6,00;68,00
+Administração de Pessoal;Cálculos;Administração de Pessoal — Cálculos;Treinar Tela Lançamentos Fixos e Variáveis;0,50;6,00;68,00
+Administração de Pessoal;Cálculos;Administração de Pessoal — Cálculos;Cálculos e Recálculos da Folha;1,00;6,00;68,00
+Administração de Pessoal;Cálculos;Administração de Pessoal — Cálculos;Treinamento Tela Ficha Financeira;0,50;6,00;68,00
+Administração de Pessoal;Cálculos;Administração de Pessoal — Cálculos;Treinamento Relatórios Ficha Financeira;0,50;6,00;68,00
+Administração de Pessoal;Cálculos;Administração de Pessoal — Cálculos;Treinamento Resumos de Folha e Relações de Líquidos;0,50;6,00;68,00
+Administração de Pessoal;Cálculos;Administração de Pessoal — Cálculos;Treinamento Geração Arquivo Bancário;0,50;6,00;68,00
+Administração de Pessoal;Contabilização;Administração de Pessoal — Contabilização;Cadastro de Provisões;0,25;5,00;68,00
+Administração de Pessoal;Contabilização;Administração de Pessoal — Contabilização;Cálculo de Provisões;0,25;5,00;68,00
+Administração de Pessoal;Contabilização;Administração de Pessoal — Contabilização;Consulta Provisões;0,25;5,00;68,00
+Administração de Pessoal;Contabilização;Administração de Pessoal — Contabilização;Relatórios Provisões;0,25;5,00;68,00
+Administração de Pessoal;Contabilização;Administração de Pessoal — Contabilização;Definições Contábeis;0,50;5,00;68,00
+Administração de Pessoal;Contabilização;Administração de Pessoal — Contabilização;Cadastrar Centros de Custos;0,25;5,00;68,00
+Administração de Pessoal;Contabilização;Administração de Pessoal — Contabilização;Cadastrar CLCs;0,50;5,00;68,00
+Administração de Pessoal;Contabilização;Administração de Pessoal — Contabilização;Natureza de Despesa;0,25;5,00;68,00
+Administração de Pessoal;Contabilização;Administração de Pessoal — Contabilização;Assinalar CLCs;0,50;5,00;68,00
+Administração de Pessoal;Contabilização;Administração de Pessoal — Contabilização;Cadastrar Rateios;0,25;5,00;68,00
+Administração de Pessoal;Contabilização;Administração de Pessoal — Contabilização;Assinalar Rateios;0,25;5,00;68,00
+Administração de Pessoal;Contabilização;Administração de Pessoal — Contabilização;Cadastro Contas Contábeis;0,50;5,00;68,00
+Administração de Pessoal;Contabilização;Administração de Pessoal — Contabilização;Cálculo Contabilização;0,50;5,00;68,00
+Administração de Pessoal;Contabilização;Administração de Pessoal — Contabilização;Relatórios Contábeis;0,50;5,00;68,00
+Administração de Pessoal;Criação Arquivo Contábil;Administração de Pessoal — Criação Arquivo Contábil;Desenvolvimento Arquivo TXT Contábil (Forma nativa do sistema sem regras);7,50;8,00;68,00
+Administração de Pessoal;Criação Arquivo Contábil;Administração de Pessoal — Criação Arquivo Contábil;Geração Arquivo TXT;0,50;8,00;68,00
+Administração de Pessoal;Integração ERP;Administração de Pessoal — Integração ERP;Definições de Integrações Financeiras;0,25;5,00;68,00
+Administração de Pessoal;Integração ERP;Administração de Pessoal — Integração ERP;Cadastro de CIFs;2,00;5,00;68,00
+Administração de Pessoal;Integração ERP;Administração de Pessoal — Integração ERP;Consulta de Pendências;0,50;5,00;68,00
+Administração de Pessoal;Integração ERP;Administração de Pessoal — Integração ERP;Recriação de Pendências;0,25;5,00;68,00
+Administração de Pessoal;Integração ERP;Administração de Pessoal — Integração ERP;Integração Financeira;1,00;5,00;68,00
+Administração de Pessoal;Integração ERP;Administração de Pessoal — Integração ERP;Relatórios da Rotina;1,00;5,00;68,00
+Administração de Pessoal;eSocial;Administração de Pessoal — eSocial;Definições eSocial;0,50;7,00;68,00
+Administração de Pessoal;eSocial;Administração de Pessoal — eSocial;Parâmetros no Cadastro de Empresas e Filiais;1,00;7,00;68,00
+Administração de Pessoal;eSocial;Administração de Pessoal — eSocial;Parâmetros nos Cadastro de Eventos;0,50;7,00;68,00
+Administração de Pessoal;eSocial;Administração de Pessoal — eSocial;Geração de Tabelas;0,50;7,00;68,00
+Administração de Pessoal;eSocial;Administração de Pessoal — eSocial;Fechamento de Admissão;0,50;7,00;68,00
+Administração de Pessoal;eSocial;Administração de Pessoal — eSocial;Fechamento de Demissão;0,50;7,00;68,00
+Administração de Pessoal;eSocial;Administração de Pessoal — eSocial;Geração de Não Periódicos;1,00;7,00;68,00
+Administração de Pessoal;eSocial;Administração de Pessoal — eSocial;Geração de Periódicos;1,00;7,00;68,00
+Administração de Pessoal;eSocial;Administração de Pessoal — eSocial;Tela de Consulta de Pendências e Envio;0,50;7,00;68,00
+Administração de Pessoal;eSocial;Administração de Pessoal — eSocial;Relatórios de Retorno do eSocial;1,00;7,00;68,00
+Administração de Pessoal;Impostos;Administração de Pessoal — Impostos;Incidências INSS;0,50;5,00;68,00
+Administração de Pessoal;Impostos;Administração de Pessoal — Impostos;Geração Relatórios e Conferência INSS;0,50;5,00;68,00
+Administração de Pessoal;Impostos;Administração de Pessoal — Impostos;Incidências FGTS;0,50;5,00;68,00
+Administração de Pessoal;Impostos;Administração de Pessoal — Impostos;Geração Relatórios e Conferência FGTS;0,50;5,00;68,00
+Administração de Pessoal;Impostos;Administração de Pessoal — Impostos;Incidências IRRF;0,50;5,00;68,00
+Administração de Pessoal;Impostos;Administração de Pessoal — Impostos;Geração Relatórios e Conferência IRRF;0,50;5,00;68,00
+Administração de Pessoal;Impostos;Administração de Pessoal — Impostos;Indicências PIS;0,50;5,00;68,00
+Administração de Pessoal;Impostos;Administração de Pessoal — Impostos;Geração Relatórios e Conferência PIS;0,50;5,00;68,00
+Administração de Pessoal;Impostos;Administração de Pessoal — Impostos;Validação Impostos eSocial;1,00;5,00;68,00
+Administração de Pessoal;Anuais;Administração de Pessoal — Anuais;Parametrizações DIRF;1,00;4,00;68,00
+Administração de Pessoal;Anuais;Administração de Pessoal — Anuais;Geração DIRF;0,50;4,00;68,00
+Administração de Pessoal;Anuais;Administração de Pessoal — Anuais;Conferência DIRF;1,00;4,00;68,00
+Administração de Pessoal;Anuais;Administração de Pessoal — Anuais;Geração Arquivo TXT e Relatórios DIRF;1,00;4,00;68,00
+Administração de Pessoal;Anuais;Administração de Pessoal — Anuais;Geração Informe de Rendimento;0,50;4,00;68,00
+Benefícios;Vales;Benefícios — Vales;Parametrização e simulação da Rotina;2,00;3,00;18,00
+Benefícios;Vales;Benefícios — Vales;Relatórios da Rotina;0,50;3,00;18,00
+Benefícios;Vales;Benefícios — Vales;Integração Folha de Pagamento;0,50;3,00;18,00
+Benefícios;Assistência;Benefícios — Assistência;Parametrização e Assinalamento;1,00;2,50;18,00
+Benefícios;Assistência;Benefícios — Assistência;Lançamento Despesas;0,50;2,50;18,00
+Benefícios;Assistência;Benefícios — Assistência;Relatórios da Rotina;0,50;2,50;18,00
+Benefícios;Assistência;Benefícios — Assistência;Integração Folha de Pagamento;0,50;2,50;18,00
+Benefícios;Émpréstimo Consignado;Benefícios — Émpréstimo Consignado;Parametrização e simulação da Rotina;1,00;3,00;18,00
+Benefícios;Émpréstimo Consignado;Benefícios — Émpréstimo Consignado;Relatórios da Rotina;1,00;3,00;18,00
+Benefícios;Émpréstimo Consignado;Benefícios — Émpréstimo Consignado;Integração Folha de Pagamento;1,00;3,00;18,00
+Benefícios;Empréstimos;Benefícios — Empréstimos;Parametrização e simulação da Rotina;2,00;3,50;18,00
+Benefícios;Empréstimos;Benefícios — Empréstimos;Relatórios da Rotina;1,00;3,50;18,00
+Benefícios;Empréstimos;Benefícios — Empréstimos;Integração Folha de Pagamento;0,50;3,50;18,00
+Benefícios;Auxílio Creche;Benefícios — Auxílio Creche;Parametrização e simulação da Rotina;1,00;2,00;18,00
+Benefícios;Auxílio Creche;Benefícios — Auxílio Creche;Relatórios da Rotina;0,50;2,00;18,00
+Benefícios;Auxílio Creche;Benefícios — Auxílio Creche;Integração Folha de Pagamento;0,50;2,00;18,00
+Benefícios;Vale Transporte;Benefícios — Vale Transporte;Parametrização e simulação da Rotina;2,00;4,00;18,00
+Benefícios;Vale Transporte;Benefícios — Vale Transporte;Relatórios da Rotina;1,00;4,00;18,00
+Benefícios;Vale Transporte;Benefícios — Vale Transporte;Integração Folha de Pagamento;1,00;4,00;18,00
+Segurança do Trabalho;Tabelas Gerais;Segurança do Trabalho — Tabelas Gerais;Demonstração Cadastral das Tabelas Gerais do Módulo;2,00;2,00;40,00
+Segurança do Trabalho;Configurações;Segurança do Trabalho — Configurações;Configurações e Definições do Módulo;2,00;2,00;40,00
+Segurança do Trabalho;Brigada;Segurança do Trabalho — Brigada;Treinamento da Rotina;1,50;2,00;40,00
+Segurança do Trabalho;Brigada;Segurança do Trabalho — Brigada;Demonstração Relatórios;0,50;2,00;40,00
+Segurança do Trabalho;Planos de Ação;Segurança do Trabalho — Planos de Ação;Treinamento da Rotina;3,00;4,00;40,00
+Segurança do Trabalho;Planos de Ação;Segurança do Trabalho — Planos de Ação;Demonstração Relatórios;1,00;4,00;40,00
+Segurança do Trabalho;CIPA;Segurança do Trabalho — CIPA;Treinamento da Rotina;3,00;4,00;40,00
+Segurança do Trabalho;CIPA;Segurança do Trabalho — CIPA;Demonstração Relatórios;1,00;4,00;40,00
+Segurança do Trabalho;Equipamentos;Segurança do Trabalho — Equipamentos;Treinamento da Rotina;3,00;4,00;40,00
+Segurança do Trabalho;Equipamentos;Segurança do Trabalho — Equipamentos;Demonstração Relatórios;1,00;4,00;40,00
+Segurança do Trabalho;EPIs;Segurança do Trabalho — EPIs;Treinamento da Rotina;3,00;4,00;40,00
+Segurança do Trabalho;EPIs;Segurança do Trabalho — EPIs;Demonstração Relatórios;1,00;4,00;40,00
+Segurança do Trabalho;PGR por GHE;Segurança do Trabalho — PGR por GHE;Treinamento da Rotina;6,00;8,00;40,00
+Segurança do Trabalho;PGR por GHE;Segurança do Trabalho — PGR por GHE;Demonstração Relatórios;2,00;8,00;40,00
+Segurança do Trabalho;Acidentes de Trabalho;Segurança do Trabalho — Acidentes de Trabalho;Treinamento da Rotina;3,00;4,00;40,00
+Segurança do Trabalho;Acidentes de Trabalho;Segurança do Trabalho — Acidentes de Trabalho;Demonstração Relatórios;1,00;4,00;40,00
+Segurança do Trabalho;PPP;Segurança do Trabalho — PPP;Treinamento da Rotina;2,00;3,00;40,00
+Segurança do Trabalho;PPP;Segurança do Trabalho — PPP;Demonstração Relatórios;1,00;3,00;40,00
+Segurança do Trabalho;eSocial;Segurança do Trabalho — eSocial;Geração eventos eSocial (S-2240 e S-2210);3,00;3,00;40,00
+Medicina Ocupacional;Tabelas Gerais;Medicina Ocupacional — Tabelas Gerais;Demonstração Cadastral das Tabelas Gerais do Módulo;1,50;1,50;40,00
+Medicina Ocupacional;Configurações;Medicina Ocupacional — Configurações;Configurações e Definições do Módulo;1,50;1,50;40,00
+Medicina Ocupacional;Ficha Médica;Medicina Ocupacional — Ficha Médica;Cadastro, Geração e Consultas da Ficha Médica;2,00;4,00;40,00
+Medicina Ocupacional;Ficha Médica;Medicina Ocupacional — Ficha Médica;Prontuário Clínico;1,00;4,00;40,00
+Medicina Ocupacional;Ficha Médica;Medicina Ocupacional — Ficha Médica;Relatórios da Rotina;1,00;4,00;40,00
+Medicina Ocupacional;Atendimentos;Medicina Ocupacional — Atendimentos;Atendentes;2,00;14,00;40,00
+Medicina Ocupacional;Atendimentos;Medicina Ocupacional — Atendimentos;Pré Atendimento;1,50;14,00;40,00
+Medicina Ocupacional;Atendimentos;Medicina Ocupacional — Atendimentos;Questionários;1,00;14,00;40,00
+Medicina Ocupacional;Atendimentos;Medicina Ocupacional — Atendimentos;Receitas Médicas;0,50;14,00;40,00
+Medicina Ocupacional;Atendimentos;Medicina Ocupacional — Atendimentos;Atestados;0,50;14,00;40,00
+Medicina Ocupacional;Atendimentos;Medicina Ocupacional — Atendimentos;Medicamentos;1,00;14,00;40,00
+Medicina Ocupacional;Atendimentos;Medicina Ocupacional — Atendimentos;Atendimentos;2,50;14,00;40,00
+Medicina Ocupacional;Atendimentos;Medicina Ocupacional — Atendimentos;Atestado Externo;0,50;14,00;40,00
+Medicina Ocupacional;Atendimentos;Medicina Ocupacional — Atendimentos;ASO Externo;1,00;14,00;40,00
+Medicina Ocupacional;Atendimentos;Medicina Ocupacional — Atendimentos;Encaminhamentos;0,50;14,00;40,00
+Medicina Ocupacional;Atendimentos;Medicina Ocupacional — Atendimentos;Pedido Exames;1,00;14,00;40,00
+Medicina Ocupacional;Atendimentos;Medicina Ocupacional — Atendimentos;Relatórios da Rotina;2,00;14,00;40,00
+Medicina Ocupacional;PCMSO;Medicina Ocupacional — PCMSO;Cadastro de Exames;2,00;9,00;40,00
+Medicina Ocupacional;PCMSO;Medicina Ocupacional — PCMSO;Periodicidade Exames por GHE;2,00;9,00;40,00
+Medicina Ocupacional;PCMSO;Medicina Ocupacional — PCMSO;Geração Exames;1,00;9,00;40,00
+Medicina Ocupacional;PCMSO;Medicina Ocupacional — PCMSO;Resultados Exames;2,00;9,00;40,00
+Medicina Ocupacional;PCMSO;Medicina Ocupacional — PCMSO;Consultas;1,00;9,00;40,00
+Medicina Ocupacional;PCMSO;Medicina Ocupacional — PCMSO;Relatórios da Rotina;1,00;9,00;40,00
+Medicina Ocupacional;Audiometria;Medicina Ocupacional — Audiometria;Cadastros da Rotina;2,00;5,00;40,00
+Medicina Ocupacional;Audiometria;Medicina Ocupacional — Audiometria;Orientações Preenchimentos;1,00;5,00;40,00
+Medicina Ocupacional;Audiometria;Medicina Ocupacional — Audiometria;Cadastro Resultados;1,00;5,00;40,00
+Medicina Ocupacional;Audiometria;Medicina Ocupacional — Audiometria;Relatorios da Rotina;1,00;5,00;40,00
+Medicina Ocupacional;Vacinas;Medicina Ocupacional — Vacinas;Cadastro Medicamentos;1,00;3,00;40,00
+Medicina Ocupacional;Vacinas;Medicina Ocupacional — Vacinas;Criação Campanhas e Publicos Alvo;1,00;3,00;40,00
+Medicina Ocupacional;Vacinas;Medicina Ocupacional — Vacinas;Registro Aplicações;0,50;3,00;40,00
+Medicina Ocupacional;Vacinas;Medicina Ocupacional — Vacinas;Relatórios da Rotina;0,50;3,00;40,00
+Medicina Ocupacional;eSocial;Medicina Ocupacional — eSocial;Geração eventos eSocial (S-2220);2,00;2,00;40,00
+Quadro de Vagas;Definições Empresas;Quadro de Vagas — Definições Empresas;Parâmetros iniciais e vínculos de empresas.;3,00;3,00;24,00
+Quadro de Vagas;Plano de Vagas;Quadro de Vagas — Plano de Vagas;Planejamento e estruturação do quadro de vagas previsto.;2,00;4,00;24,00
+Quadro de Vagas;Plano de Vagas;Quadro de Vagas — Plano de Vagas;Definição Hierarquia de Postos do Quadro;2,00;4,00;24,00
+Quadro de Vagas;Normalização;Quadro de Vagas — Normalização;Normalização do Quadro Realizado;2,00;6,00;24,00
+Quadro de Vagas;Normalização;Quadro de Vagas — Normalização;Gestão de reservas e movimentações de colaboradores.;2,00;6,00;24,00
+Quadro de Vagas;Normalização;Quadro de Vagas — Normalização;Normalização/Geração do Quadro Previsto;2,00;6,00;24,00
+Quadro de Vagas;Manutenção;Quadro de Vagas — Manutenção;Administração de Vagas;3,00;6,00;24,00
+Quadro de Vagas;Manutenção;Quadro de Vagas — Manutenção;Manutenção de Vagas;3,00;6,00;24,00
+Quadro de Vagas;Propostas;Quadro de Vagas — Propostas;Criação e aprovação de propostas de alteração de quadro conforme Hierquia utilizada no Plano de Vagas;2,00;2,00;24,00
+Quadro de Vagas;Telas Consultas;Quadro de Vagas — Telas Consultas;Exploração das telas e consultas disponíveis.;1,50;1,50;24,00
+Quadro de Vagas;Relatórios do Módulo;Quadro de Vagas — Relatórios do Módulo;Principais Relatórios do Módulo;1,50;1,50;24,00
+Orçamento de Pessoal;Definições do Módulo;Orçamento de Pessoal — Definições do Módulo;Estruturação inicial e parâmetros gerais;2,00;2,00;32,00
+Orçamento de Pessoal;Cenários, Visões e Revisões;Orçamento de Pessoal — Cenários, Visões e Revisões;Treinamento de criação de múltiplos cenários e visões orçamentárias;3,00;3,00;32,00
+Orçamento de Pessoal;Itens de Orçamento;Orçamento de Pessoal — Itens de Orçamento;Criação de itens e agrupamentos de despesas;4,00;4,00;32,00
+Orçamento de Pessoal;Geração Cenário e Históricos;Orçamento de Pessoal — Geração Cenário e Históricos;Geração e versionamento de cenários;3,00;12,00;32,00
+Orçamento de Pessoal;Geração Cenário e Históricos;Orçamento de Pessoal — Geração Cenário e Históricos;Criação de Históricos;4,00;12,00;32,00
+Orçamento de Pessoal;Geração Cenário e Históricos;Orçamento de Pessoal — Geração Cenário e Históricos;Manutenção no Orçamento;5,00;12,00;32,00
+Orçamento de Pessoal;Cálculo Orçamento e Consultas;Orçamento de Pessoal — Cálculo Orçamento e Consultas;Execução de cálculos, análises e simulações.;4,00;8,00;32,00
+Orçamento de Pessoal;Cálculo Orçamento e Consultas;Orçamento de Pessoal — Cálculo Orçamento e Consultas;Consulta do Orçamento Calculado e possíveis manutenções;4,00;8,00;32,00
+Orçamento de Pessoal;Relatórios do Módulo;Orçamento de Pessoal — Relatórios do Módulo;Principais Relatórios do Módulo;3,00;3,00;32,00
+Treinamento;Cursos;Treinamento — Cursos;Cadastro Cursos de Formação;1,00;4,00;40,00
+Treinamento;Cursos;Treinamento — Cursos;Cadastro Cursos de Aperfeiçoamento;1,00;4,00;40,00
+Treinamento;Cursos;Treinamento — Cursos;Cadastro Conhecimentos;1,00;4,00;40,00
+Treinamento;Cursos;Treinamento — Cursos;Relatórios da Rotina;1,00;4,00;40,00
+Treinamento;Requisitos;Treinamento — Requisitos;Vinculação de Requisitos de Treinamentos em Cargos e Postos de Trabalho;2,00;2,00;40,00
+Treinamento;Históricos Cursos;Treinamento — Históricos Cursos;Cadastro e Consulta de Históricos de Cursos de Formação;0,50;3,00;40,00
+Treinamento;Históricos Cursos;Treinamento — Históricos Cursos;Cadastro e Consulta de Históricos de Aperfeiçoamento;0,50;3,00;40,00
+Treinamento;Históricos Cursos;Treinamento — Históricos Cursos;Cadastro e Consulta de Históricos de Conhecimentos;0,50;3,00;40,00
+Treinamento;Históricos Cursos;Treinamento — Históricos Cursos;Históricos Gerais por Colaborador;0,50;3,00;40,00
+Treinamento;Históricos Cursos;Treinamento — Históricos Cursos;Acompanhamento Vencimentos de Cursos;1,00;3,00;40,00
+Treinamento;Orçamento;Treinamento — Orçamento;Itens de Orçamentos;1,00;5,00;40,00
+Treinamento;Orçamento;Treinamento — Orçamento;Custos para Orçamento;1,00;5,00;40,00
+Treinamento;Orçamento;Treinamento — Orçamento;Previsão Orçamento;1,00;5,00;40,00
+Treinamento;Orçamento;Treinamento — Orçamento;Cálculo Orçamento;1,00;5,00;40,00
+Treinamento;Orçamento;Treinamento — Orçamento;Relatórios da Rotina;1,00;5,00;40,00
+Treinamento;Cursos e Turmas;Treinamento — Cursos e Turmas;Cadastros Gerais da Rotina;1,00;16,00;40,00
+Treinamento;Cursos e Turmas;Treinamento — Cursos e Turmas;Caléndários;1,00;16,00;40,00
+Treinamento;Cursos e Turmas;Treinamento — Cursos e Turmas;Salas;1,00;16,00;40,00
+Treinamento;Cursos e Turmas;Treinamento — Cursos e Turmas;CurSos;1,00;16,00;40,00
+Treinamento;Cursos e Turmas;Treinamento — Cursos e Turmas;Questionários;1,00;16,00;40,00
+Treinamento;Cursos e Turmas;Treinamento — Cursos e Turmas;Disponbilidades;1,00;16,00;40,00
+Treinamento;Cursos e Turmas;Treinamento — Cursos e Turmas;Reservas;1,00;16,00;40,00
+Treinamento;Cursos e Turmas;Treinamento — Cursos e Turmas;Definição de Turmas;2,00;16,00;40,00
+Treinamento;Cursos e Turmas;Treinamento — Cursos e Turmas;Confirmação de Turmas;1,00;16,00;40,00
+Treinamento;Cursos e Turmas;Treinamento — Cursos e Turmas;Despesas;1,00;16,00;40,00
+Treinamento;Cursos e Turmas;Treinamento — Cursos e Turmas;Frequência;1,00;16,00;40,00
+Treinamento;Cursos e Turmas;Treinamento — Cursos e Turmas;Lançamento de Notas;1,00;16,00;40,00
+Treinamento;Cursos e Turmas;Treinamento — Cursos e Turmas;Avaliação de Reação;1,00;16,00;40,00
+Treinamento;Cursos e Turmas;Treinamento — Cursos e Turmas;Relatórios da Rotina;1,00;16,00;40,00
+Treinamento;Cursos e Turmas;Treinamento — Cursos e Turmas;Eventos;1,00;16,00;40,00
+Treinamento;PDIs;Treinamento — PDIs;Criação de PDIs;2,00;4,00;40,00
+Treinamento;PDIs;Treinamento — PDIs;Acompanhamento de PDIs;1,00;4,00;40,00
+Treinamento;PDIs;Treinamento — PDIs;Relatórios da Rotina;1,00;4,00;40,00
+Treinamento;Auxílio Educação;Treinamento — Auxílio Educação;Definições da Política;2,00;5,00;40,00
+Treinamento;Auxílio Educação;Treinamento — Auxílio Educação;Vinculação Colaboradores;1,00;5,00;40,00
+Treinamento;Auxílio Educação;Treinamento — Auxílio Educação;Lançamento Recibos;1,00;5,00;40,00
+Treinamento;Auxílio Educação;Treinamento — Auxílio Educação;Integração p/ Folha de Pagamento;1,00;5,00;40,00
+Treinamento;TR Web;Treinamento — TR Web;Acesso e manusemento TR Web;1,00;1,00;40,00
+Cargos e Salário;Cargos;Cargos e Salário — Cargos;Cadastro de Cargos;1,00;2,50;24,00
+Cargos e Salário;Cargos;Cargos e Salário — Cargos;Requisitos de Cargos;1,00;2,50;24,00
+Cargos e Salário;Cargos;Cargos e Salário — Cargos;Relatórios de Cargos;0,50;2,50;24,00
+Cargos e Salário;Postos de Trabalho;Cargos e Salário — Postos de Trabalho;Cadastro Postos de Trabalho;2,00;6,00;24,00
+Cargos e Salário;Postos de Trabalho;Cargos e Salário — Postos de Trabalho;Possibilidade Geração Automática Postos de Trabalho (Nativo);1,00;6,00;24,00
+Cargos e Salário;Postos de Trabalho;Cargos e Salário — Postos de Trabalho;Hierarquia de Postos de Trabalho;1,00;6,00;24,00
+Cargos e Salário;Postos de Trabalho;Cargos e Salário — Postos de Trabalho;Requisitos de Postos;1,00;6,00;24,00
+Cargos e Salário;Postos de Trabalho;Cargos e Salário — Postos de Trabalho;Vinculação de Postos aos Colaboradores;0,50;6,00;24,00
+Cargos e Salário;Postos de Trabalho;Cargos e Salário — Postos de Trabalho;Relatórios da Rotina;0,50;6,00;24,00
+Cargos e Salário;Descrição;Cargos e Salário — Descrição;Cadastro Atividades;1,00;4,00;24,00
+Cargos e Salário;Descrição;Cargos e Salário — Descrição;Descrição de Cargos;1,00;4,00;24,00
+Cargos e Salário;Descrição;Cargos e Salário — Descrição;Descrição de Postos;1,00;4,00;24,00
+Cargos e Salário;Descrição;Cargos e Salário — Descrição;Relatórios da Rotina;1,00;4,00;24,00
+Cargos e Salário;Estrutura Salarial;Cargos e Salário — Estrutura Salarial;Cadastro Estruturas Salariais;1,50;4,00;24,00
+Cargos e Salário;Estrutura Salarial;Cargos e Salário — Estrutura Salarial;Reajuste Estruturas Salariais;1,00;4,00;24,00
+Cargos e Salário;Estrutura Salarial;Cargos e Salário — Estrutura Salarial;Vinculação Estrutura Salariais aos Postos, Cargos e Colaboradores;1,00;4,00;24,00
+Cargos e Salário;Estrutura Salarial;Cargos e Salário — Estrutura Salarial;Principais Relatórios da Rotina;0,50;4,00;24,00
+Cargos e Salário;Propostas;Cargos e Salário — Propostas;Geração Propostas de Cargo;1,00;6,50;24,00
+Cargos e Salário;Propostas;Cargos e Salário — Propostas;Aprovação Propostas de Cargo;1,00;6,50;24,00
+Cargos e Salário;Propostas;Cargos e Salário — Propostas;Efetivação Propostas de Cargo;1,00;6,50;24,00
+Cargos e Salário;Propostas;Cargos e Salário — Propostas;Geração Propostas Salariais;1,00;6,50;24,00
+Cargos e Salário;Propostas;Cargos e Salário — Propostas;Aprovação Propostas Salariais;1,00;6,50;24,00
+Cargos e Salário;Propostas;Cargos e Salário — Propostas;Efetivação Propostas Salariais;1,00;6,50;24,00
+Cargos e Salário;Propostas;Cargos e Salário — Propostas;Acompanhamento e Relatórios da Rotina;0,50;6,50;24,00
+Cargos e Salário;CS Web;Cargos e Salário — CS Web;Acesso e manusemento CS Web;1,00;1,00;24,00
+Jurídico;Cadastro Básico;Jurídico — Cadastro Básico;Valores de Ações Trabalhistas;0,50;5,00;24,00
+Jurídico;Cadastro Básico;Jurídico — Cadastro Básico;Índices de Reclamatórias;0,50;5,00;24,00
+Jurídico;Cadastro Básico;Jurídico — Cadastro Básico;Assuntos;0,50;5,00;24,00
+Jurídico;Cadastro Básico;Jurídico — Cadastro Básico;Tipos de Ação;0,50;5,00;24,00
+Jurídico;Cadastro Básico;Jurídico — Cadastro Básico;Pedidos (autos do processo);0,50;5,00;24,00
+Jurídico;Cadastro Básico;Jurídico — Cadastro Básico;Andamentos (audiências);0,50;5,00;24,00
+Jurídico;Cadastro Básico;Jurídico — Cadastro Básico;Varas e Comarcas;0,50;5,00;24,00
+Jurídico;Cadastro Básico;Jurídico — Cadastro Básico;Motivos de Encerramento ;0,50;5,00;24,00
+Jurídico;Cadastro Básico;Jurídico — Cadastro Básico;Definições de Cálculo;0,50;5,00;24,00
+Jurídico;Cadastro Básico;Jurídico — Cadastro Básico;Advogados (contrários e defesa da Empresa);0,50;5,00;24,00
+Jurídico;Ações Judiciais;Jurídico — Ações Judiciais;Definições;1,00;10,00;24,00
+Jurídico;Ações Judiciais;Jurídico — Ações Judiciais;Dados básicos do processo);1,00;10,00;24,00
+Jurídico;Ações Judiciais;Jurídico — Ações Judiciais;Autor/reclamante;1,00;10,00;24,00
+Jurídico;Ações Judiciais;Jurídico — Ações Judiciais;Réu;1,00;10,00;24,00
+Jurídico;Ações Judiciais;Jurídico — Ações Judiciais;Pedidos (autos do processo);1,00;10,00;24,00
+Jurídico;Ações Judiciais;Jurídico — Ações Judiciais;Testumanhas (parte contrária e empresa);1,00;10,00;24,00
+Jurídico;Ações Judiciais;Jurídico — Ações Judiciais;Andamentos (audiências);1,00;10,00;24,00
+Jurídico;Ações Judiciais;Jurídico — Ações Judiciais;Pagamentos;1,00;10,00;24,00
+Jurídico;Ações Judiciais;Jurídico — Ações Judiciais;Depósitos Recursais;1,00;10,00;24,00
+Jurídico;Ações Judiciais;Jurídico — Ações Judiciais;Relatórios;1,00;10,00;24,00
+Jurídico;eSocial;Jurídico — eSocial;Definição do Processo;2,00;8,00;24,00
+Jurídico;eSocial;Jurídico — eSocial;Cadastro, geração e envio Leiaute S-2500 - Processo Trabalhista;1,50;8,00;24,00
+Jurídico;eSocial;Jurídico — eSocial;"Cadastro, geração e envio Leiaute S-2501 - Informações de Tributos Processo Trabalhista;";1,50;8,00;24,00
+Jurídico;eSocial;Jurídico — eSocial;Cadastro, geração e envio Leiaute S-3501 - Exclusão de Eventos - Processo Trabalhista;1,50;8,00;24,00
+Jurídico;eSocial;Jurídico — eSocial;Detalhamento do Pedido;1,50;8,00;24,00
+Jurídico;Integração;Jurídico — Integração;Integração com Adm. de Pessoal (folha);1,00;1,00;24,00
+
+`.trim();
+    // FIM DO CSV — SUBSTITUA AS LINHAS ACIMA PELO SEU TABELA.CSV COMPLETO
+
+    // ============================================================
+    // 2. PARSE DO CSV E ESTRUTURA EM MEMÓRIA
+    // ============================================================
+
+    function parseNumberBR(str) {
+      if (!str) return 0;
+      return parseFloat(str.replace(/\./g, "").replace(",", "."));
+    }
+
+    function formatNumberBR(num, dec = 2) {
+      return num
+        .toFixed(dec)
+        .replace(".", ",")
+        .replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
+
+    const lines = csvData.split(/\r?\n/);
+    const header = lines[0].split(";");
+    const colModulo = header.indexOf("MÓDULO");
+    const colRotina = header.indexOf("ROTINA");
+    const colEspecificacao = header.indexOf("ESPECIFICAÇÃO");
+    const colTotalRotina = header.indexOf("TOTAL ROTINA");
+
+    const routinesMap = new Map();
+
+    for (let i = 1; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (!line) continue;
+      const cols = line.split(";");
+      const modulo = cols[colModulo];
+      const rotina = cols[colRotina];
+      const especificacao = cols[colEspecificacao];
+      const totalRotina = parseNumberBR(cols[colTotalRotina]);
+
+      const key = modulo + "||" + rotina;
+      if (!routinesMap.has(key)) {
+        routinesMap.set(key, {
+          modulo,
+          rotina,
+          totalHoras: totalRotina,
+          especificacoes: [],
+          included: true,
+        });
+      }
+      routinesMap.get(key).especificacoes.push(especificacao);
+    }
+
+    const allRoutines = Array.from(routinesMap.values());
+    const modulesSet = new Set(allRoutines.map((r) => r.modulo));
+
+    const selectedModules = new Set();
+
+    // ============================================================
+    // 3. RENDERIZAÇÃO
+    // ============================================================
+
+    const modulesListEl = document.getElementById("modulesList");
+    const routinesListEl = document.getElementById("routinesList");
+    const totalHorasEl = document.getElementById("totalHoras");
+    const totalModulosEl = document.getElementById("totalModulos");
+    const custoEstimadoEl = document.getElementById("custoEstimado");
+    const valorHoraInputEl = document.getElementById("valorHoraInput");
+    const rotinasEscopoInfoEl = document.getElementById("rotinasEscopoInfo");
+
+    function renderModules() {
+      modulesListEl.innerHTML = "";
+      Array.from(modulesSet)
+        .sort((a, b) => a.localeCompare(b, "pt-BR"))
+        .forEach((modulo) => {
+          const item = document.createElement("div");
+          item.className = "module-item";
+
+          const left = document.createElement("div");
+          left.className = "module-left";
+
+          const checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.className = "module-checkbox";
+          checkbox.dataset.modulo = modulo;
+
+          checkbox.addEventListener("change", () => {
+            if (checkbox.checked) {
+              selectedModules.add(modulo);
+              allRoutines
+                .filter((r) => r.modulo === modulo)
+                .forEach((r) => (r.included = true));
+            } else {
+              selectedModules.delete(modulo);
+              allRoutines
+                .filter((r) => r.modulo === modulo)
+                .forEach((r) => (r.included = false));
+            }
+            renderRoutines();
+            updateTotals();
+          });
+
+          const name = document.createElement("span");
+          name.className = "module-name";
+          name.textContent = modulo;
+
+          left.appendChild(checkbox);
+          left.appendChild(name);
+
+          const pill = document.createElement("span");
+          pill.className = "module-pill";
+          pill.textContent = "Módulo";
+
+          item.appendChild(left);
+          item.appendChild(pill);
+
+          modulesListEl.appendChild(item);
+        });
+    }
+
+    function renderRoutines() {
+      routinesListEl.innerHTML = "";
+
+      const routinesToShow = allRoutines.filter((r) =>
+        selectedModules.has(r.modulo)
+      );
+
+      routinesToShow.forEach((routine) => {
+        const row = document.createElement("div");
+        row.className = "routine-row";
+
+        const cbCell = document.createElement("div");
+        const cb = document.createElement("input");
+        cb.type = "checkbox";
+        cb.className = "routine-checkbox";
+        cb.checked = routine.included;
+        cb.addEventListener("change", () => {
+          routine.included = cb.checked;
+          updateTotals();
+        });
+        cbCell.appendChild(cb);
+
+        const moduleCell = document.createElement("div");
+        moduleCell.className = "routine-module";
+        moduleCell.textContent = routine.modulo;
+
+        const nameCell = document.createElement("div");
+        nameCell.className = "routine-name";
+        nameCell.textContent = routine.rotina;
+
+        const hoursCell = document.createElement("div");
+        hoursCell.className = "routine-hours";
+        hoursCell.textContent = formatNumberBR(routine.totalHoras, 2);
+
+        row.appendChild(cbCell);
+        row.appendChild(moduleCell);
+        row.appendChild(nameCell);
+        row.appendChild(hoursCell);
+
+        routinesListEl.appendChild(row);
+      });
+    }
+
+    // ============================================================
+    // 4. TOTAIS
+    // ============================================================
+
+    function updateTotals() {
+      let totalHoras = 0;
+      let rotinasEscopo = 0;
+
+      const selectedRoutines = allRoutines.filter(
+        (r) => selectedModules.has(r.modulo) && r.included
+      );
+
+      selectedRoutines.forEach((r) => {
+        totalHoras += r.totalHoras;
+        rotinasEscopo += 1;
+      });
+
+      const valorHora = parseFloat(valorHoraInputEl.value || "0");
+      const custo = totalHoras * valorHora;
+
+      totalHorasEl.textContent = `${formatNumberBR(totalHoras, 2)} h`;
+      totalModulosEl.textContent = selectedModules.size.toString();
+      custoEstimadoEl.textContent = `R$ ${formatNumberBR(custo, 2)}`;
+      rotinasEscopoInfoEl.textContent = `Rotinas no escopo: ${rotinasEscopo}`;
+    }
+
+    valorHoraInputEl.addEventListener("input", updateTotals);
+
+    // ============================================================
+    // 5. GERAÇÃO DO PDF
+    // ============================================================
+
+    async function gerarPdfEscopo() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ unit: "pt", format: "a4" });
+
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const marginLeft = 56;
+      let y = 64;
+
+      async function getLogoDataUrl() {
+        return new Promise((resolve) => {
+          const img = new Image();
+          img.src = "komvos_logo.png";
+          img.crossOrigin = "anonymous";
+          img.onload = function () {
+            try {
+              const canvas = document.createElement("canvas");
+              canvas.width = img.width;
+              canvas.height = img.height;
+              const ctx = canvas.getContext("2d");
+              ctx.drawImage(img, 0, 0);
+              const dataUrl = canvas.toDataURL("image/png");
+              resolve(dataUrl);
+            } catch (e) {
+              resolve(null);
+            }
+          };
+          img.onerror = function () {
+            resolve(null);
+          };
+        });
+      }
+
+      const logoDataUrl = await getLogoDataUrl();
+
+      if (logoDataUrl) {
+        const logoWidth = 120;
+        const logoHeight = 35;
+        doc.addImage(logoDataUrl, "PNG", marginLeft, y - 20, logoWidth, logoHeight);
+        y += logoHeight + 10;
+      } else {
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(20);
+        doc.text("KOMVOS", marginLeft, y);
+        y += 18;
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(11);
+        doc.text("Tecnologia que transforma", marginLeft, y);
+        y += 18;
+      }
+
+      y += 10;
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(15);
+      doc.text("Escopo de Treinamento HCM", marginLeft, y);
+      y += 24;
+
+      const selectedRoutines = allRoutines.filter(
+        (r) => selectedModules.has(r.modulo) && r.included
+      );
+
+      if (selectedRoutines.length === 0) {
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(12);
+        doc.text(
+          "Nenhuma rotina selecionada no escopo no momento.",
+          marginLeft,
+          y
+        );
+        doc.save("Escopo_Treinamento_HCM.pdf");
+        return;
+      }
+
+      const modulesMap = new Map();
+      selectedRoutines.forEach((r) => {
+        if (!modulesMap.has(r.modulo)) modulesMap.set(r.modulo, new Map());
+        const rotinasMap = modulesMap.get(r.modulo);
+        rotinasMap.set(r.rotina, r.especificacoes);
+      });
+
+      const lineHeight = 14;
+      const maxWidth = pageWidth - marginLeft * 2;
+
+      function ensureSpace(linesNeeded) {
+        const remaining = doc.internal.pageSize.getHeight() - y - 40;
+        if (remaining < linesNeeded * lineHeight) {
+          doc.addPage();
+          y = 64;
+        }
+      }
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(12);
+
+      for (const [modulo, rotinasMap] of modulesMap.entries()) {
+        ensureSpace(3);
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(13);
+        doc.text(`Módulo: ${modulo}`, marginLeft, y);
+        y += 20;
+
+        for (const [rotina, especificacoes] of rotinasMap.entries()) {
+          ensureSpace(2 + especificacoes.length * 2);
+
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(12);
+          doc.text(`• ${rotina}`, marginLeft + 8, y);
+          y += 16;
+
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(11);
+
+          especificacoes.forEach((esp) => {
+            const wrapped = doc.splitTextToSize(`- ${esp}`, maxWidth);
+            wrapped.forEach((line) => {
+              ensureSpace(1);
+              doc.text(line, marginLeft + 22, y);
+              y += lineHeight;
+            });
+          });
+
+          y += 8;
+        }
+
+        y += 8;
+      }
+
+      doc.save("Escopo_Treinamento_HCM.pdf");
+    }
+
+    document
+      .getElementById("btnGerarPdf")
+      .addEventListener("click", gerarPdfEscopo);
+
+    // ============================================================
+    // 6. INICIALIZA
+    // ============================================================
+    renderModules();
+  </script>
+</body>
+</html>
