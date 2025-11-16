@@ -33,7 +33,7 @@
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      margin-bottom: 20px;
+      margin-bottom: 14px;
       flex-wrap: wrap;
     }
 
@@ -95,6 +95,71 @@
       min-width: 180px;
     }
 
+    /* BARRA DE DADOS DA PROPOSTA (CLIENTE / CONTATO / DATA / VALIDADE) */
+    .proposal-wrapper {
+      background: rgba(7, 15, 30, 0.96);
+      border-radius: 18px;
+      padding: 10px 14px 12px;
+      box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.03),
+        0 14px 32px rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(16px);
+      margin-bottom: 14px;
+    }
+
+    .proposal-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px 14px;
+      margin-bottom: 8px;
+    }
+
+    .proposal-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .proposal-field-label {
+      font-size: 11px;
+      margin-bottom: 3px;
+      color: #cbd5f5;
+    }
+
+    .proposal-input {
+      width: 100%;
+      border-radius: 10px;
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      background: #020617;
+      color: #e5e7eb;
+      font-size: 13px;
+      padding: 6px 9px;
+      outline: none;
+    }
+
+    .proposal-input::placeholder {
+      color: #64748b;
+    }
+
+    .proposal-input[readonly] {
+      color: #94a3b8;
+      cursor: default;
+      background: #020617;
+    }
+
+    @media (max-width: 900px) {
+      header {
+        align-items: flex-start;
+      }
+      .page-wrapper {
+        padding: 16px 10px 28px;
+      }
+      .header-tag {
+        text-align: left;
+      }
+      .proposal-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
     main {
       display: grid;
       grid-template-columns: 340px 1fr;
@@ -105,9 +170,6 @@
     @media (max-width: 900px) {
       main {
         grid-template-columns: 1fr;
-      }
-      .page-wrapper {
-        padding: 16px 10px 28px;
       }
     }
 
@@ -133,64 +195,6 @@
       font-size: 11px;
       color: #9ba7c7;
       margin-bottom: 10px;
-    }
-
-    /* NOVO BLOCO: informações da proposta (cliente, contato, data, validade) */
-
-    .proposal-info {
-      margin-bottom: 12px;
-      padding: 8px 10px;
-      border-radius: 14px;
-      background: #020617;
-      border: 1px solid rgba(148, 163, 184, 0.5);
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .proposal-row {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 8px;
-    }
-
-    @media (max-width: 480px) {
-      .proposal-row {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .proposal-field {
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
-    }
-
-    .field-label {
-      font-size: 11px;
-      color: #e2e8f0;
-    }
-
-    .field-input,
-    .field-input-date {
-      border-radius: 10px;
-      border: 1px solid rgba(148, 163, 184, 0.7);
-      background: #020617;
-      color: #e5e7eb;
-      padding: 6px 8px;
-      font-size: 12px;
-      outline: none;
-      width: 100%;
-    }
-
-    .field-input::placeholder,
-    .field-input-date::placeholder {
-      color: #64748b;
-    }
-
-    .field-input[readonly] {
-      opacity: 0.85;
-      cursor: default;
     }
 
     .modules-list {
@@ -282,6 +286,11 @@
 
     .valor-hora-block {
       margin-bottom: 10px;
+    }
+
+    .field-label {
+      font-size: 12px;
+      margin-bottom: 4px;
     }
 
     .valor-hora-input-wrapper {
@@ -518,9 +527,6 @@
       .routine-row {
         grid-template-columns: 32px 120px 1fr 70px;
       }
-      .header-tag {
-        text-align: left;
-      }
     }
   </style>
 </head>
@@ -543,55 +549,55 @@
       </div>
     </header>
 
+    <!-- BARRA COM CLIENTE / CONTATO / DATA / VALIDADE -->
+    <section class="proposal-wrapper">
+      <div class="proposal-row">
+        <div>
+          <div class="proposal-field-label">Cliente</div>
+          <input
+            id="clienteInput"
+            class="proposal-input"
+            type="text"
+            placeholder="Nome do cliente"
+          />
+        </div>
+        <div>
+          <div class="proposal-field-label">Contato (DDD + telefone)</div>
+          <input
+            id="contatoInput"
+            class="proposal-input"
+            type="text"
+            placeholder="(11) 99999-9999"
+          />
+        </div>
+      </div>
+      <div class="proposal-row">
+        <div>
+          <div class="proposal-field-label">Data</div>
+          <input
+            id="dataHoje"
+            class="proposal-input"
+            type="text"
+            readonly
+          />
+        </div>
+        <div>
+          <div class="proposal-field-label">Validade da Proposta</div>
+          <input
+            id="validadeInput"
+            class="proposal-input"
+            type="date"
+          />
+        </div>
+      </div>
+    </section>
+
     <main>
       <!-- PAINEL ESQUERDO -->
       <section class="panel">
         <div class="panel-title">Módulos</div>
         <div class="panel-subtitle">
           Marque um ou mais módulos. Todas as rotinas serão carregadas automaticamente para compor o escopo.
-        </div>
-
-        <!-- NOVO BLOCO: CLIENTE / CONTATO / DATA / VALIDADE -->
-        <div class="proposal-info">
-          <div class="proposal-row">
-            <div class="proposal-field">
-              <div class="field-label">Cliente</div>
-              <input
-                id="clienteInput"
-                type="text"
-                class="field-input"
-                placeholder="Nome do cliente"
-              />
-            </div>
-            <div class="proposal-field">
-              <div class="field-label">Contato (DDD + telefone)</div>
-              <input
-                id="contatoInput"
-                type="tel"
-                class="field-input"
-                placeholder="(11) 99999-9999"
-              />
-            </div>
-          </div>
-          <div class="proposal-row">
-            <div class="proposal-field">
-              <div class="field-label">Data</div>
-              <input
-                id="dataInput"
-                type="text"
-                class="field-input"
-                readonly
-              />
-            </div>
-            <div class="proposal-field">
-              <div class="field-label">Validade da Proposta</div>
-              <input
-                id="validadeInput"
-                type="date"
-                class="field-input-date"
-              />
-            </div>
-          </div>
         </div>
 
         <div class="modules-list" id="modulesList"></div>
@@ -679,7 +685,7 @@
 
   <script>
     // ============================================================
-    // 1. COLE AQUI O CONTEÚDO DO SEU CSV (substitua o exemplo)
+    // 1. COLE AQUI O CONTEÚDO DO SEU CSV
     // ============================================================
     const csvData = `
 MÓDULO;ROTINA;MÓDULO - ROTINA;ESPECIFICAÇÃO;HORAS;TOTAL ROTINA;TOTAL MÓDULO
@@ -974,7 +980,7 @@ Jurídico;eSocial;Jurídico — eSocial;Cadastro, geração e envio Leiaute S-35
 Jurídico;eSocial;Jurídico — eSocial;Detalhamento do Pedido;1,50;8,00;24,00
 Jurídico;Integração;Jurídico — Integração;Integração com Adm. de Pessoal (folha);1,00;1,00;24,00
 `.trim();
-    // FIM DO CSV — SUBSTITUA AS LINHAS ACIMA PELO SEU TABELA.CSV COMPLETO
+    // Depois de colar, apague esta linha de comentário acima.
 
     // ============================================================
     // 2. PARSE DO CSV E ESTRUTURA EM MEMÓRIA
@@ -1025,7 +1031,6 @@ Jurídico;Integração;Jurídico — Integração;Integração com Adm. de Pesso
 
     const allRoutines = Array.from(routinesMap.values());
     const modulesSet = new Set(allRoutines.map((r) => r.modulo));
-
     const selectedModules = new Set();
 
     // ============================================================
@@ -1042,7 +1047,7 @@ Jurídico;Integração;Jurídico — Integração;Integração com Adm. de Pesso
 
     const clienteInputEl = document.getElementById("clienteInput");
     const contatoInputEl = document.getElementById("contatoInput");
-    const dataInputEl = document.getElementById("dataInput");
+    const dataHojeEl = document.getElementById("dataHoje");
     const validadeInputEl = document.getElementById("validadeInput");
 
     function renderModules() {
@@ -1167,38 +1172,84 @@ Jurídico;Integração;Jurídico — Integração;Integração com Adm. de Pesso
     valorHoraInputEl.addEventListener("input", updateTotals);
 
     // ============================================================
-    // 5. CAMPOS CLIENTE / CONTATO / DATA / VALIDADE
+    // 5. CAMPOS DE CABEÇALHO (DATA / VALIDADE)
     // ============================================================
 
-    function initProposalFields() {
-      const today = new Date();
-      const pad = (n) => n.toString().padStart(2, "0");
+    function inicializarDatas() {
+      const hoje = new Date();
+      const dia = String(hoje.getDate()).padStart(2, "0");
+      const mes = String(hoje.getMonth() + 1).padStart(2, "0");
+      const ano = hoje.getFullYear();
 
-      const dataBR = `${pad(today.getDate())}/${pad(today.getMonth() + 1)}/${today.getFullYear()}`;
-      dataInputEl.value = dataBR;
+      // Data apenas para visualização
+      dataHojeEl.value = `${dia}/${mes}/${ano}`;
 
-      const addDays = (date, days) => {
-        const d = new Date(date.getTime());
-        d.setDate(d.getDate() + days);
-        return d;
-      };
+      // Validade padrão = +14 dias
+      const validadeDefault = new Date(hoje);
+      validadeDefault.setDate(validadeDefault.getDate() + 14);
+      const vd = String(validadeDefault.getDate()).padStart(2, "0");
+      const vm = String(validadeDefault.getMonth() + 1).padStart(2, "0");
+      const va = validadeDefault.getFullYear();
+      const validadeDefaultStr = `${va}-${vm}-${vd}`;
 
-      const validadeDefault = addDays(today, 14);
-      const validadeMax = addDays(today, 30);
+      // Limites de validade: hoje até +30 dias
+      const minStr = `${ano}-${mes}-${dia}`;
+      const maxDate = new Date(hoje);
+      maxDate.setDate(maxDate.getDate() + 30);
+      const md = String(maxDate.getDate()).padStart(2, "0");
+      const mm2 = String(maxDate.getMonth() + 1).padStart(2, "0");
+      const ma = maxDate.getFullYear();
+      const maxStr = `${ma}-${mm2}-${md}`;
 
-      const toInputDate = (d) =>
-        `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-
-      validadeInputEl.value = toInputDate(validadeDefault);
-      validadeInputEl.min = toInputDate(today);
-      validadeInputEl.max = toInputDate(validadeMax);
+      validadeInputEl.min = minStr;
+      validadeInputEl.max = maxStr;
+      validadeInputEl.value = validadeDefaultStr;
     }
 
-    function validarTelefone(contato) {
-      // aceita números, espaços, parênteses, traços, +, mas valida pela
-      // quantidade de dígitos: mínimo 10, máximo 11
-      const digits = contato.replace(/\D/g, "");
-      return digits.length === 10 || digits.length === 11;
+    function validarCabecalho() {
+      const cliente = clienteInputEl.value.trim();
+      const contato = contatoInputEl.value.trim();
+      const validadeStr = validadeInputEl.value;
+
+      if (!cliente) {
+        alert("Informe o nome do cliente.");
+        return null;
+      }
+
+      if (!contato) {
+        alert("Informe o contato (DDD + telefone).");
+        return null;
+      }
+
+      const apenasDigitos = contato.replace(/\D/g, "");
+      if (apenasDigitos.length < 10 || apenasDigitos.length > 11) {
+        alert("Contato inválido. Use DDD + telefone (fixo ou celular).");
+        return null;
+      }
+
+      if (!validadeStr) {
+        alert("Informe a validade da proposta.");
+        return null;
+      }
+
+      const validade = new Date(validadeStr);
+      const hoje = new Date();
+      hoje.setHours(0, 0, 0, 0);
+      validade.setHours(0, 0, 0, 0);
+
+      const diffDias = (validade - hoje) / (1000 * 60 * 60 * 24);
+
+      if (diffDias < 0) {
+        alert("A validade da proposta não pode ser anterior à data de hoje.");
+        return null;
+      }
+
+      if (diffDias > 30) {
+        alert("A validade da proposta não pode ser superior a 30 dias a partir de hoje.");
+        return null;
+      }
+
+      return { cliente, contato, validade };
     }
 
     // ============================================================
@@ -1206,52 +1257,15 @@ Jurídico;Integração;Jurídico — Integração;Integração com Adm. de Pesso
     // ============================================================
 
     async function gerarPdfEscopo() {
-      // Valida campos obrigatórios antes de montar o PDF
-      const cliente = (clienteInputEl.value || "").trim();
-      const contato = (contatoInputEl.value || "").trim();
-      const dataBR = (dataInputEl.value || "").trim();
-      const validadeISO = (validadeInputEl.value || "").trim();
+      const cabecalho = validarCabecalho();
+      if (!cabecalho) return;
 
-      if (!cliente) {
-        alert("Preencha o campo CLIENTE para gerar o PDF.");
-        return;
-      }
-
-      if (!contato) {
-        alert("Preencha o campo CONTATO para gerar o PDF.");
-        return;
-      }
-
-      if (!validarTelefone(contato)) {
-        alert("Informe um CONTATO válido (DDD + telefone, 10 ou 11 dígitos).");
-        return;
-      }
-
-      if (!validadeISO) {
-        alert("Preencha o campo VALIDADE DA PROPOSTA para gerar o PDF.");
-        return;
-      }
-
-      // Valida intervalo entre data atual e validade (até 30 dias)
-      const hoje = new Date();
-      const validadeDate = new Date(validadeISO + "T00:00:00");
-      const diffMs = validadeDate - new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
-      const diffDias = diffMs / (1000 * 60 * 60 * 24);
-
-      if (diffDias < 0 || diffDias > 30) {
-        alert("A validade da proposta deve estar entre hoje e 30 dias a partir de hoje.");
-        return;
-      }
-
-      // Converte validade para BR
-      const pad = (n) => n.toString().padStart(2, "0");
-      const validadeBR = `${pad(validadeDate.getDate())}/${pad(validadeDate.getMonth() + 1)}/${validadeDate.getFullYear()}`;
+      const { cliente, contato, validade } = cabecalho;
 
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF({ unit: "pt", format: "a4" });
 
       const pageWidth = doc.internal.pageSize.getWidth();
-      const pageHeight = doc.internal.pageSize.getHeight();
       const marginLeft = 56;
       let y = 64;
 
@@ -1301,19 +1315,23 @@ Jurídico;Integração;Jurídico — Integração;Integração com Adm. de Pesso
       doc.setFont("helvetica", "bold");
       doc.setFontSize(15);
       doc.text("Escopo de Treinamento HCM", marginLeft, y);
-      y += 22;
+      y += 24;
 
-      // Bloco com CLIENTE / CONTATO / DATA / VALIDADE no PDF
+      // Dados do cabeçalho no PDF
       doc.setFont("helvetica", "normal");
       doc.setFontSize(11);
+
+      const dataStr = dataHojeEl.value; // já está em dd/mm/aaaa
+      const validadeStrBR = validade.toLocaleDateString("pt-BR");
+
       doc.text(`Cliente: ${cliente}`, marginLeft, y);
       y += 14;
       doc.text(`Contato: ${contato}`, marginLeft, y);
       y += 14;
-      doc.text(`Data: ${dataBR}`, marginLeft, y);
+      doc.text(`Data: ${dataStr}`, marginLeft, y);
       y += 14;
-      doc.text(`Validade da proposta: ${validadeBR}`, marginLeft, y);
-      y += 20;
+      doc.text(`Validade da proposta: ${validadeStrBR}`, marginLeft, y);
+      y += 22;
 
       const selectedRoutines = allRoutines.filter(
         (r) => selectedModules.has(r.modulo) && r.included
@@ -1342,7 +1360,7 @@ Jurídico;Integração;Jurídico — Integração;Integração com Adm. de Pesso
       const maxWidth = pageWidth - marginLeft * 2;
 
       function ensureSpace(linesNeeded) {
-        const remaining = pageHeight - y - 40;
+        const remaining = doc.internal.pageSize.getHeight() - y - 40;
         if (remaining < linesNeeded * lineHeight) {
           doc.addPage();
           y = 64;
@@ -1395,8 +1413,8 @@ Jurídico;Integração;Jurídico — Integração;Integração com Adm. de Pesso
     // ============================================================
     // 7. INICIALIZA
     // ============================================================
-    initProposalFields();
     renderModules();
+    inicializarDatas();
   </script>
 </body>
 </html>
