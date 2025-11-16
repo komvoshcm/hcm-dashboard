@@ -1,230 +1,687 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<title>Dashboard Treinamentos HCM - Comercial</title>
+  <meta charset="UTF-8" />
+  <title>Dashboard Treinamentos HCM</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
 
-<!-- Fonte e estilo visual -->
-<style>
+  <!-- jsPDF para gerar o PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: "Segoe UI", Roboto, Arial, sans-serif;
+    }
+
     body {
-        margin: 0;
-        font-family: Arial, sans-serif;
-        background: #111;
-        color: #eee;
+      background: radial-gradient(circle at top, #182b3a 0, #050810 45%, #020308 100%);
+      color: #f5f7fb;
+      min-height: 100vh;
     }
+
+    .page-wrapper {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 18px 10px 32px;
+    }
+
     header {
-        background: #1e1e1e;
-        padding: 15px;
-        text-align: center;
-        border-bottom: 2px solid #444;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
     }
-    header img {
-        height: 60px;
-        margin-bottom: 10px;
+
+    .logo-area {
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
+
+    .logo-img {
+      height: 38px;
+      width: auto;
+      object-fit: contain;
+    }
+
+    .logo-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.2;
+    }
+
+    .logo-text-main {
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      font-size: 16px;
+    }
+
+    .logo-text-sub {
+      font-size: 11px;
+      color: #9ba7c7;
+      text-transform: uppercase;
+    }
+
+    .header-title-block {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      flex: 1;
+      min-width: 220px;
+    }
+
+    .header-kicker {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: #6cc5ff;
+    }
+
     h1 {
-        margin: 5px 0 0 0;
-        font-size: 22px;
-        color: #fff;
+      font-size: 20px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
     }
 
-    .container {
-        display: flex;
-        height: calc(100vh - 90px);
+    .header-tag {
+      font-size: 10px;
+      color: #9ba7c7;
+      text-align: right;
+      min-width: 180px;
     }
-    .left-panel {
-        width: 320px;
-        background: #181818;
-        border-right: 2px solid #333;
-        padding: 15px;
-        overflow-y: auto;
+
+    main {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 16px;
+      align-items: flex-start;
     }
-    .left-panel h2 {
-        margin-top: 0;
-        color: #fff;
-        font-size: 18px;
+
+    @media (max-width: 900px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+      .page-wrapper {
+        padding: 16px 10px 28px;
+      }
     }
+
+    .panel {
+      background: rgba(7, 15, 30, 0.96);
+      border-radius: 18px;
+      padding: 14px 14px 16px;
+      box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.03),
+        0 20px 45px rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(16px);
+    }
+
+    .panel-title {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: #7dd8ff;
+      margin-bottom: 4px;
+    }
+
+    .panel-subtitle {
+      font-size: 11px;
+      color: #9ba7c7;
+      margin-bottom: 10px;
+    }
+
+    /* NOVO BLOCO: informações da proposta (cliente, contato, data, validade) */
+
+    .proposal-info {
+      margin-bottom: 12px;
+      padding: 8px 10px;
+      border-radius: 14px;
+      background: #020617;
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .proposal-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    @media (max-width: 480px) {
+      .proposal-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .proposal-field {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .field-label {
+      font-size: 11px;
+      color: #e2e8f0;
+    }
+
+    .field-input,
+    .field-input-date {
+      border-radius: 10px;
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      background: #020617;
+      color: #e5e7eb;
+      padding: 6px 8px;
+      font-size: 12px;
+      outline: none;
+      width: 100%;
+    }
+
+    .field-input::placeholder,
+    .field-input-date::placeholder {
+      color: #64748b;
+    }
+
+    .field-input[readonly] {
+      opacity: 0.85;
+      cursor: default;
+    }
+
+    .modules-list {
+      max-height: 260px;
+      overflow-y: auto;
+      padding-right: 4px;
+      margin-bottom: 12px;
+    }
+
+    .modules-list::-webkit-scrollbar,
+    .routines-list::-webkit-scrollbar {
+      width: 6px;
+    }
+    .modules-list::-webkit-scrollbar-thumb,
+    .routines-list::-webkit-scrollbar-thumb {
+      background: rgba(140, 192, 255, 0.5);
+      border-radius: 999px;
+    }
+
     .module-item {
-        background: #222;
-        padding: 10px;
-        border-radius: 8px;
-        margin-bottom: 8px;
-        cursor: pointer;
-        border: 1px solid #333;
-    }
-    .module-item:hover {
-        background: #2d2d2d;
-    }
-
-    .right-panel {
-        flex: 1;
-        padding: 15px;
-        overflow-y: auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: linear-gradient(90deg, #111827, #050814);
+      border-radius: 12px;
+      padding: 8px 10px 8px 8px;
+      margin-bottom: 6px;
+      border: 1px solid rgba(120, 180, 255, 0.24);
     }
 
-    .summary-box {
-        background: #1a1a1a;
-        border: 2px solid #333;
-        padding: 15px;
-        border-radius: 10px;
-        margin-bottom: 20px;
-        display: flex;
-        justify-content: space-between;
-        gap: 15px;
-    }
-    .summary-card {
-        flex: 1;
-        padding: 12px;
-        background: #222;
-        border-radius: 8px;
-        border: 1px solid #444;
-        text-align: center;
-    }
-    .summary-big {
-        flex: 2;
-        padding: 12px;
-        background: #222;
-        border-radius: 8px;
-        border: 1px solid #444;
-        text-align: center;
-        font-size: 20px;
+    .module-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
-    .routine-card {
-        background: #1c1c1c;
-        border: 1px solid #333;
-        margin-bottom: 10px;
-        padding: 12px;
-        border-radius: 8px;
-    }
-    .routine-header {
-        display: flex;
-        justify-content: space-between;
-    }
-    .checkbox {
-        transform: scale(1.3);
-        margin-right: 10px;
+    .module-checkbox {
+      width: 16px;
+      height: 16px;
+      accent-color: #3ddcff;
+      cursor: pointer;
     }
 
-    table {
-        width: 100%;
-        margin-top: 10px;
-        border-collapse: collapse;
-        color: #ddd;
-    }
-    table td {
-        padding: 6px;
-        border-bottom: 1px solid #333;
+    .module-name {
+      font-size: 13px;
+      font-weight: 600;
     }
 
-    .form-section {
-        background: #1a1a1a;
-        border: 1px solid #333;
-        padding: 15px;
-        border-radius: 8px;
-        margin-bottom: 20px;
-    }
-    .form-section label {
-        display: block;
-        margin-top: 10px;
-        font-weight: bold;
-    }
-    .form-section input {
-        width: 100%;
-        padding: 8px;
-        margin-top: 4px;
-        background: #222;
-        color: #fff;
-        border: 1px solid #555;
-        border-radius: 6px;
+    .module-pill {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(201, 229, 255, 0.4);
+      color: #cde7ff;
+      background: radial-gradient(circle at top, rgba(66, 201, 255, 0.25), transparent 60%);
+      white-space: nowrap;
     }
 
-    .btn {
-        background: #007bff;
-        color: #fff;
-        padding: 12px 20px;
-        border-radius: 8px;
-        border: 0;
-        cursor: pointer;
-        font-size: 16px;
-        margin-top: 10px;
+    .note {
+      font-size: 10px;
+      color: #7b8aaa;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
     }
-    .btn:hover {
-        background: #0a89ff;
-    }
-</style>
 
+    .note-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: #3ddcff;
+      margin-top: 4px;
+    }
+
+    .inline-badge {
+      display: inline-block;
+      padding: 1px 6px;
+      border-radius: 999px;
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      background: rgba(6, 148, 162, 0.18);
+      border: 1px solid rgba(34, 211, 238, 0.4);
+      color: #a5f3fc;
+    }
+
+    .valor-hora-block {
+      margin-bottom: 10px;
+    }
+
+    .valor-hora-input-wrapper {
+      background: #020617;
+      border-radius: 12px;
+      padding: 7px 10px;
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+    }
+
+    .valor-hora-input-wrapper span {
+      font-size: 11px;
+      color: #94a3b8;
+      padding: 3px 7px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.5);
+    }
+
+    .valor-hora-input {
+      flex: 1;
+      border: none;
+      outline: none;
+      background: transparent;
+      color: #e5e7eb;
+      font-size: 14px;
+      text-align: center;
+    }
+
+    .valor-hora-input::placeholder {
+      color: #64748b;
+    }
+
+    .totals-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 8px;
+      width: 100%;
+    }
+
+    .total-card {
+      background: radial-gradient(circle at top, rgba(15, 118, 255, 0.3), rgba(15, 23, 42, 0.95));
+      border-radius: 14px;
+      padding: 8px 10px 9px;
+      border: 1px solid rgba(148, 163, 184, 0.55);
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.8);
+    }
+
+    .total-card-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: #bfdbfe;
+      margin-bottom: 3px;
+    }
+
+    .total-card-main {
+      font-size: 17px;
+      font-weight: 700;
+    }
+
+    .total-card-sub {
+      font-size: 9px;
+      color: #cbd5f5;
+      margin-top: 2px;
+    }
+
+    .cost-card-wrapper {
+      width: 100%;
+      margin: 0 auto 8px;
+    }
+
+    .cost-card {
+      width: 100%;
+      background: radial-gradient(circle at top, rgba(45, 212, 191, 0.45), rgba(15, 23, 42, 0.96));
+      border-radius: 16px;
+      padding: 9px 10px 11px;
+      border: 1px solid rgba(45, 212, 191, 0.7);
+      box-shadow: 0 16px 40px rgba(15, 23, 42, 0.9);
+      text-align: center;
+    }
+
+    .cost-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: #a5f3fc;
+      margin-bottom: 3px;
+    }
+
+    .cost-value {
+      font-size: 20px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .generate-btn {
+      margin-top: 5px;
+      width: 100%;
+      padding: 9px 12px;
+      border-radius: 999px;
+      border: none;
+      background: linear-gradient(135deg, #22d3ee, #0ea5e9);
+      color: #020617;
+      font-weight: 600;
+      font-size: 12px;
+      cursor: pointer;
+      box-shadow: 0 12px 30px rgba(8, 145, 178, 0.7);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    .generate-btn:hover {
+      filter: brightness(1.05);
+      box-shadow: 0 14px 36px rgba(8, 145, 178, 0.85);
+    }
+
+    .scope-footer-info {
+      margin-top: 8px;
+      font-size: 10px;
+      color: #64748b;
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .routines-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 10px;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .routines-header-title {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: #7dd8ff;
+    }
+
+    .routines-header-subtitle {
+      font-size: 11px;
+      color: #9ba7c7;
+      max-width: 520px;
+    }
+
+    .routines-container {
+      border-radius: 14px;
+      background: #020617;
+      border: 1px solid rgba(148, 163, 184, 0.45);
+      overflow: hidden;
+    }
+
+    .routines-header-row {
+      display: grid;
+      grid-template-columns: 40px 160px 1fr 80px;
+      padding: 6px 10px;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      background: #020617;
+      color: #9ca3af;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.3);
+    }
+
+    .routines-list {
+      max-height: 420px;
+      overflow-y: auto;
+    }
+
+    .routine-row {
+      display: grid;
+      grid-template-columns: 40px 160px 1fr 80px;
+      padding: 7px 10px;
+      font-size: 12px;
+      align-items: center;
+      border-bottom: 1px solid rgba(30, 64, 175, 0.35);
+      background: linear-gradient(90deg, rgba(15, 23, 42, 0.96), rgba(15, 23, 42, 0.92));
+    }
+
+    .routine-row:nth-child(even) {
+      background: linear-gradient(90deg, rgba(15, 23, 42, 0.96), rgba(17, 24, 39, 0.94));
+    }
+
+    .routine-checkbox {
+      width: 14px;
+      height: 14px;
+      accent-color: #22c55e;
+      cursor: pointer;
+    }
+
+    .routine-module {
+      font-size: 11px;
+      color: #cbd5f5;
+    }
+
+    .routine-name {
+      font-size: 12px;
+    }
+
+    .routine-hours {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .badge-active {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10px;
+      border-radius: 999px;
+      padding: 2px 8px;
+      border: 1px solid rgba(52, 211, 153, 0.7);
+      background: rgba(16, 185, 129, 0.15);
+      color: #bbf7d0;
+      white-space: nowrap;
+    }
+
+    .badge-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: #4ade80;
+    }
+
+    @media (max-width: 700px) {
+      .routines-header-row,
+      .routine-row {
+        grid-template-columns: 32px 120px 1fr 70px;
+      }
+      .header-tag {
+        text-align: left;
+      }
+    }
+  </style>
 </head>
-
 <body>
+  <div class="page-wrapper">
+    <header>
+      <div class="logo-area">
+        <img src="komvos_logo.png" alt="KOMVOS" class="logo-img" />
+        <div class="logo-text">
+          <span class="logo-text-main">KOMVOS</span>
+          <span class="logo-text-sub">Tecnologia que transforma</span>
+        </div>
+      </div>
+      <div class="header-title-block">
+        <span class="header-kicker">Dashboard Comercial · Treinamentos HCM</span>
+        <h1>Dashboard de Precificação HCM</h1>
+      </div>
+      <div class="header-tag">
+        <span>GitHub Pages · Versão responsiva</span>
+      </div>
+    </header>
 
-<header>
-    <img src="logo.png" alt="Komvos">
-    <h1>Dashboard Comercial – Treinamentos HCM</h1>
-</header>
-
-<div class="container">
-
-    <!-- Painel esquerdo -->
-    <div class="left-panel">
-        <h2>Módulos</h2>
-        <div id="moduleList"></div>
-    </div>
-
-    <!-- Painel direito -->
-    <div class="right-panel">
-
-        <!-- CAMPOS DO CLIENTE / CONTATO / DATA / VALIDADE -->
-        <div class="form-section">
-            <label>Cliente:</label>
-            <input id="clienteInput" type="text">
-
-            <label>Contato (Telefone):</label>
-            <input id="contatoInput" type="text" placeholder="(11) 99999-9999">
-
-            <label>Data:</label>
-            <input id="dataInput" type="text" disabled>
-
-            <label>Validade da Proposta:</label>
-            <input id="validadeInput" type="date">
+    <main>
+      <!-- PAINEL ESQUERDO -->
+      <section class="panel">
+        <div class="panel-title">Módulos</div>
+        <div class="panel-subtitle">
+          Marque um ou mais módulos. Todas as rotinas serão carregadas automaticamente para compor o escopo.
         </div>
 
-        <!-- RESUMO -->
-        <div class="summary-box">
-            <div class="summary-card">
-                <h3>Módulos Selecionados</h3>
-                <div id="modCount">0</div>
+        <!-- NOVO BLOCO: CLIENTE / CONTATO / DATA / VALIDADE -->
+        <div class="proposal-info">
+          <div class="proposal-row">
+            <div class="proposal-field">
+              <div class="field-label">Cliente</div>
+              <input
+                id="clienteInput"
+                type="text"
+                class="field-input"
+                placeholder="Nome do cliente"
+              />
             </div>
-
-            <div class="summary-card">
-                <h3>Horas Totais</h3>
-                <div id="totalHours">0</div>
+            <div class="proposal-field">
+              <div class="field-label">Contato (DDD + telefone)</div>
+              <input
+                id="contatoInput"
+                type="tel"
+                class="field-input"
+                placeholder="(11) 99999-9999"
+              />
             </div>
-
-            <div class="summary-big">
-                <h3>Custo Estimado</h3>
-                <div id="estimatedCost">R$ 0,00</div>
-                <small>Valor hora base: R$ 120,00</small>
+          </div>
+          <div class="proposal-row">
+            <div class="proposal-field">
+              <div class="field-label">Data</div>
+              <input
+                id="dataInput"
+                type="text"
+                class="field-input"
+                readonly
+              />
             </div>
+            <div class="proposal-field">
+              <div class="field-label">Validade da Proposta</div>
+              <input
+                id="validadeInput"
+                type="date"
+                class="field-input-date"
+              />
+            </div>
+          </div>
         </div>
 
-        <h2>Rotinas Selecionadas</h2>
-        <div id="routineList"></div>
+        <div class="modules-list" id="modulesList"></div>
 
-        <button class="btn" onclick="generatePDF()">Gerar PDF</button>
+        <div class="note">
+          <div class="note-dot"></div>
+          <div>
+            Cálculos feitos apenas no navegador. Nenhuma informação é enviada para servidores.
+            <span class="inline-badge">Uso interno Komvos</span>
+          </div>
+        </div>
 
-    </div>
-</div>
+        <div class="valor-hora-block">
+          <div class="field-label">Valor hora base (R$):</div>
+          <div class="valor-hora-input-wrapper">
+            <span>R$</span>
+            <input
+              id="valorHoraInput"
+              class="valor-hora-input"
+              type="number"
+              step="0.01"
+              min="0"
+              value="199"
+            />
+          </div>
+        </div>
 
-<!-- jsPDF -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+        <div class="totals-grid">
+          <div class="total-card">
+            <div class="total-card-label">Horas totais</div>
+            <div id="totalHoras" class="total-card-main">0,00 h</div>
+            <div class="total-card-sub">Soma das rotinas no escopo</div>
+          </div>
+          <div class="total-card">
+            <div class="total-card-label">Módulos selecionados</div>
+            <div id="totalModulos" class="total-card-main">0</div>
+            <div class="total-card-sub">Quantidade de módulos no pacote</div>
+          </div>
+        </div>
 
-<script>
-// ============================
-//  CSV EMBUTIDO NO HTML
-// ============================
+        <div class="cost-card-wrapper">
+          <div class="cost-card">
+            <div class="cost-label">Custo estimado</div>
+            <div id="custoEstimado" class="cost-value">R$ 0,00</div>
+          </div>
+        </div>
 
-const csvText = `
+        <button class="generate-btn" id="btnGerarPdf">
+          Gerar PDF do Escopo
+        </button>
+
+        <div class="scope-footer-info">
+          <span id="rotinasEscopoInfo">Rotinas no escopo: 0</span>
+          <span id="versaoTabelaInfo">Versão da Tabela: Treinamentos HCM</span>
+        </div>
+      </section>
+
+      <!-- PAINEL DIREITO -->
+      <section class="panel">
+        <div class="routines-header">
+          <div>
+            <div class="routines-header-title">Rotinas do escopo</div>
+            <div class="routines-header-subtitle">
+              Todas as rotinas dos módulos selecionados aparecem abaixo. Desmarque o checkbox para excluir a rotina e ajustar a carga horária.
+            </div>
+          </div>
+          <div class="badge-active">
+            <span class="badge-dot"></span>
+            <span>Escopo dinâmico</span>
+          </div>
+        </div>
+
+        <div class="routines-container">
+          <div class="routines-header-row">
+            <div>Escopo</div>
+            <div>Módulo</div>
+            <div>Rotina</div>
+            <div style="text-align:right;">Horas</div>
+          </div>
+          <div class="routines-list" id="routinesList"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    // ============================================================
+    // 1. COLE AQUI O CONTEÚDO DO SEU CSV (substitua o exemplo)
+    // ============================================================
+    const csvData = `
 MÓDULO;ROTINA;MÓDULO - ROTINA;ESPECIFICAÇÃO;HORAS;TOTAL ROTINA;TOTAL MÓDULO
 Administração de Pessoal;Tabelas;Administração de Pessoal — Tabelas;Treinamento Valores (Tabelas INSS, Tabela IRRF, Valores Gerais);0,50;4,00;68,00
 Administração de Pessoal;Tabelas;Administração de Pessoal — Tabelas;Treinamento Eventos (Tabela, Eventos, Regras Nativas, Base, Incidências e Exceções);0,50;4,00;68,00
@@ -516,201 +973,430 @@ Jurídico;eSocial;Jurídico — eSocial;"Cadastro, geração e envio Leiaute S-2
 Jurídico;eSocial;Jurídico — eSocial;Cadastro, geração e envio Leiaute S-3501 - Exclusão de Eventos - Processo Trabalhista;1,50;8,00;24,00
 Jurídico;eSocial;Jurídico — eSocial;Detalhamento do Pedido;1,50;8,00;24,00
 Jurídico;Integração;Jurídico — Integração;Integração com Adm. de Pessoal (folha);1,00;1,00;24,00
-`;
+`.trim();
+    // FIM DO CSV — SUBSTITUA AS LINHAS ACIMA PELO SEU TABELA.CSV COMPLETO
 
-// ---------------------------------------------------
-// Função para converter CSV
-function parseCSV(csv) {
-    const lines = csv.trim().split("\n");
-    const headers = lines.shift().split(";").map(h => h.trim());
+    // ============================================================
+    // 2. PARSE DO CSV E ESTRUTURA EM MEMÓRIA
+    // ============================================================
 
-    return lines.map(line => {
-        const cols = line.split(";").map(c => c.trim());
-        let obj = {};
-        headers.forEach((h, i) => {
-            obj[h] = cols[i];
-        });
-        return obj;
-    });
-}
-
-let tableData = parseCSV(csvText);
-
-// Preenche data e validade
-document.getElementById("dataInput").value = new Date().toLocaleDateString("pt-BR");
-
-let validade = new Date();
-validade.setDate(validade.getDate() + 14);
-document.getElementById("validadeInput").value = validade.toISOString().split("T")[0];
-
-// --------------------------------------------
-// Construir lista de módulos
-const moduleListDiv = document.getElementById("moduleList");
-let selectedModules = [];
-let selectedRoutines = {};
-
-function loadModules() {
-    const modules = [...new Set(tableData.map(d => d["MÓDULO"]))];
-
-    modules.forEach(mod => {
-        const div = document.createElement("div");
-        div.className = "module-item";
-        div.textContent = mod;
-        div.onclick = () => toggleModule(mod);
-        moduleListDiv.appendChild(div);
-    });
-}
-
-loadModules();
-
-// --------------------------------------------
-// Selecionar módulo
-function toggleModule(mod) {
-    if (!selectedModules.includes(mod)) {
-        selectedModules.push(mod);
-    } else {
-        selectedModules = selectedModules.filter(m => m !== mod);
+    function parseNumberBR(str) {
+      if (!str) return 0;
+      return parseFloat(str.replace(/\./g, "").replace(",", "."));
     }
 
-    loadRoutines();
-    updateSummary();
-}
+    function formatNumberBR(num, dec = 2) {
+      return num
+        .toFixed(dec)
+        .replace(".", ",")
+        .replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
 
-// --------------------------------------------
-// Carregar rotinas
-function loadRoutines() {
-    const list = document.getElementById("routineList");
-    list.innerHTML = "";
+    const lines = csvData.split(/\r?\n/);
+    const header = lines[0].split(";");
+    const colModulo = header.indexOf("MÓDULO");
+    const colRotina = header.indexOf("ROTINA");
+    const colEspecificacao = header.indexOf("ESPECIFICAÇÃO");
+    const colTotalRotina = header.indexOf("TOTAL ROTINA");
 
-    selectedRoutines = {};
+    const routinesMap = new Map();
 
-    tableData.forEach(row => {
-        if (selectedModules.includes(row["MÓDULO"])) {
-            const key = row["MÓDULO - ROTINA"];
-            if (!selectedRoutines[key]) {
-                selectedRoutines[key] = {
-                    modulo: row["MÓDULO"],
-                    rotina: row["ROTINA"],
-                    especificacoes: [],
-                    horas: parseFloat(row["TOTAL ROTINA"].replace(",", "."))
-                };
+    for (let i = 1; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (!line) continue;
+      const cols = line.split(";");
+      const modulo = cols[colModulo];
+      const rotina = cols[colRotina];
+      const especificacao = cols[colEspecificacao];
+      const totalRotina = parseNumberBR(cols[colTotalRotina]);
+
+      const key = modulo + "||" + rotina;
+      if (!routinesMap.has(key)) {
+        routinesMap.set(key, {
+          modulo,
+          rotina,
+          totalHoras: totalRotina,
+          especificacoes: [],
+          included: true,
+        });
+      }
+      routinesMap.get(key).especificacoes.push(especificacao);
+    }
+
+    const allRoutines = Array.from(routinesMap.values());
+    const modulesSet = new Set(allRoutines.map((r) => r.modulo));
+
+    const selectedModules = new Set();
+
+    // ============================================================
+    // 3. RENDERIZAÇÃO
+    // ============================================================
+
+    const modulesListEl = document.getElementById("modulesList");
+    const routinesListEl = document.getElementById("routinesList");
+    const totalHorasEl = document.getElementById("totalHoras");
+    const totalModulosEl = document.getElementById("totalModulos");
+    const custoEstimadoEl = document.getElementById("custoEstimado");
+    const valorHoraInputEl = document.getElementById("valorHoraInput");
+    const rotinasEscopoInfoEl = document.getElementById("rotinasEscopoInfo");
+
+    const clienteInputEl = document.getElementById("clienteInput");
+    const contatoInputEl = document.getElementById("contatoInput");
+    const dataInputEl = document.getElementById("dataInput");
+    const validadeInputEl = document.getElementById("validadeInput");
+
+    function renderModules() {
+      modulesListEl.innerHTML = "";
+      Array.from(modulesSet)
+        .sort((a, b) => a.localeCompare(b, "pt-BR"))
+        .forEach((modulo) => {
+          const item = document.createElement("div");
+          item.className = "module-item";
+
+          const left = document.createElement("div");
+          left.className = "module-left";
+
+          const checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.className = "module-checkbox";
+          checkbox.dataset.modulo = modulo;
+
+          checkbox.addEventListener("change", () => {
+            if (checkbox.checked) {
+              selectedModules.add(modulo);
+              allRoutines
+                .filter((r) => r.modulo === modulo)
+                .forEach((r) => (r.included = true));
+            } else {
+              selectedModules.delete(modulo);
+              allRoutines
+                .filter((r) => r.modulo === modulo)
+                .forEach((r) => (r.included = false));
             }
-            selectedRoutines[key].especificacoes.push(row["ESPECIFICAÇÃO"]);
-        }
-    });
+            renderRoutines();
+            updateTotals();
+          });
 
-    Object.values(selectedRoutines).forEach(r => {
-        const card = document.createElement("div");
-        card.className = "routine-card";
+          const name = document.createElement("span");
+          name.className = "module-name";
+          name.textContent = modulo;
 
-        card.innerHTML = `
-            <div class="routine-header">
-                <label>
-                    <input type="checkbox" class="checkbox" checked onchange="updateSummary()">
-                    <strong>${r.rotina}</strong>
-                </label>
-                <span>${r.horas} h</span>
-            </div>
-        `;
+          left.appendChild(checkbox);
+          left.appendChild(name);
 
-        const table = document.createElement("table");
-        r.especificacoes.forEach(e => {
-            const tr = document.createElement("tr");
-            tr.innerHTML = `<td>• ${e}</td>`;
-            table.appendChild(tr);
+          const pill = document.createElement("span");
+          pill.className = "module-pill";
+          pill.textContent = "Módulo";
+
+          item.appendChild(left);
+          item.appendChild(pill);
+
+          modulesListEl.appendChild(item);
         });
+    }
 
-        card.appendChild(table);
-        list.appendChild(card);
-    });
-}
+    function renderRoutines() {
+      routinesListEl.innerHTML = "";
 
-// --------------------------------------------
-// Atualizar resumo
-function updateSummary() {
-    const modCount = selectedModules.length;
-    document.getElementById("modCount").textContent = modCount;
+      const routinesToShow = allRoutines.filter((r) =>
+        selectedModules.has(r.modulo)
+      );
 
-    let totalHours = 0;
-    const routineCards = document.querySelectorAll(".routine-card");
+      routinesToShow.forEach((routine) => {
+        const row = document.createElement("div");
+        row.className = "routine-row";
 
-    routineCards.forEach(card => {
-        const checkbox = card.querySelector("input[type='checkbox']");
-        if (checkbox.checked) {
-            const h = parseFloat(card.querySelector("span").innerText);
-            totalHours += h;
-        }
-    });
-
-    document.getElementById("totalHours").textContent = totalHours.toFixed(2);
-
-    const cost = totalHours * 120;
-    document.getElementById("estimatedCost").textContent =
-        cost.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-}
-
-// --------------------------------------------
-// GERAR PDF
-async function generatePDF() {
-
-    const cliente = document.getElementById("clienteInput").value.trim();
-    const contato = document.getElementById("contatoInput").value.trim();
-    const validade = document.getElementById("validadeInput").value;
-
-    if (!cliente) return alert("Preencha o nome do Cliente.");
-    if (!contato) return alert("Preencha o telefone de Contato.");
-    if (!validade) return alert("Preencha a Validade da Proposta.");
-
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF();
-
-    let y = 15;
-
-    // Logo
-    const logo = new Image();
-    logo.src = "logo.png";
-    await new Promise(res => logo.onload = res);
-    pdf.addImage(logo, "PNG", 10, 10, 40, 20);
-
-    // Título
-    pdf.setFontSize(18);
-    pdf.text("Escopo de Treinamento – HCM", 60, y + 10);
-
-    y += 25;
-
-    pdf.setFontSize(12);
-    pdf.text(`Cliente: ${cliente}`, 10, y); y += 7;
-    pdf.text(`Contato: ${contato}`, 10, y); y += 7;
-    pdf.text(`Data: ${document.getElementById("dataInput").value}`, 10, y); y += 7;
-    pdf.text(`Validade da Proposta: ${validade.split("-").reverse().join("/")}`, 10, y); y += 10;
-
-    pdf.setFontSize(14);
-    pdf.text("Escopo Detalhado:", 10, y);
-    y += 10;
-
-    Object.values(selectedRoutines).forEach(r => {
-        const card = [...document.querySelectorAll(".routine-card")]
-            .find(c => c.querySelector("strong").innerText === r.rotina);
-
-        if (!card.querySelector("input").checked) return;
-
-        pdf.setFontSize(13);
-        pdf.text(`${r.rotina} (${r.modulo})`, 10, y);
-        y += 7;
-
-        pdf.setFontSize(11);
-        r.especificacoes.forEach(e => {
-            pdf.text(`• ${e}`, 15, y);
-            y += 6;
+        const cbCell = document.createElement("div");
+        const cb = document.createElement("input");
+        cb.type = "checkbox";
+        cb.className = "routine-checkbox";
+        cb.checked = routine.included;
+        cb.addEventListener("change", () => {
+          routine.included = cb.checked;
+          updateTotals();
         });
+        cbCell.appendChild(cb);
 
-        y += 5;
-    });
+        const moduleCell = document.createElement("div");
+        moduleCell.className = "routine-module";
+        moduleCell.textContent = routine.modulo;
 
-    pdf.save("Escopo_Treinamento_HCM.pdf");
-}
+        const nameCell = document.createElement("div");
+        nameCell.className = "routine-name";
+        nameCell.textContent = routine.rotina;
 
-</script>
+        const hoursCell = document.createElement("div");
+        hoursCell.className = "routine-hours";
+        hoursCell.textContent = formatNumberBR(routine.totalHoras, 2);
 
+        row.appendChild(cbCell);
+        row.appendChild(moduleCell);
+        row.appendChild(nameCell);
+        row.appendChild(hoursCell);
+
+        routinesListEl.appendChild(row);
+      });
+    }
+
+    // ============================================================
+    // 4. TOTAIS
+    // ============================================================
+
+    function updateTotals() {
+      let totalHoras = 0;
+      let rotinasEscopo = 0;
+
+      const selectedRoutines = allRoutines.filter(
+        (r) => selectedModules.has(r.modulo) && r.included
+      );
+
+      selectedRoutines.forEach((r) => {
+        totalHoras += r.totalHoras;
+        rotinasEscopo += 1;
+      });
+
+      const valorHora = parseFloat(valorHoraInputEl.value || "0");
+      const custo = totalHoras * valorHora;
+
+      totalHorasEl.textContent = `${formatNumberBR(totalHoras, 2)} h`;
+      totalModulosEl.textContent = selectedModules.size.toString();
+      custoEstimadoEl.textContent = `R$ ${formatNumberBR(custo, 2)}`;
+      rotinasEscopoInfoEl.textContent = `Rotinas no escopo: ${rotinasEscopo}`;
+    }
+
+    valorHoraInputEl.addEventListener("input", updateTotals);
+
+    // ============================================================
+    // 5. CAMPOS CLIENTE / CONTATO / DATA / VALIDADE
+    // ============================================================
+
+    function initProposalFields() {
+      const today = new Date();
+      const pad = (n) => n.toString().padStart(2, "0");
+
+      const dataBR = `${pad(today.getDate())}/${pad(today.getMonth() + 1)}/${today.getFullYear()}`;
+      dataInputEl.value = dataBR;
+
+      const addDays = (date, days) => {
+        const d = new Date(date.getTime());
+        d.setDate(d.getDate() + days);
+        return d;
+      };
+
+      const validadeDefault = addDays(today, 14);
+      const validadeMax = addDays(today, 30);
+
+      const toInputDate = (d) =>
+        `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+
+      validadeInputEl.value = toInputDate(validadeDefault);
+      validadeInputEl.min = toInputDate(today);
+      validadeInputEl.max = toInputDate(validadeMax);
+    }
+
+    function validarTelefone(contato) {
+      // aceita números, espaços, parênteses, traços, +, mas valida pela
+      // quantidade de dígitos: mínimo 10, máximo 11
+      const digits = contato.replace(/\D/g, "");
+      return digits.length === 10 || digits.length === 11;
+    }
+
+    // ============================================================
+    // 6. GERAÇÃO DO PDF
+    // ============================================================
+
+    async function gerarPdfEscopo() {
+      // Valida campos obrigatórios antes de montar o PDF
+      const cliente = (clienteInputEl.value || "").trim();
+      const contato = (contatoInputEl.value || "").trim();
+      const dataBR = (dataInputEl.value || "").trim();
+      const validadeISO = (validadeInputEl.value || "").trim();
+
+      if (!cliente) {
+        alert("Preencha o campo CLIENTE para gerar o PDF.");
+        return;
+      }
+
+      if (!contato) {
+        alert("Preencha o campo CONTATO para gerar o PDF.");
+        return;
+      }
+
+      if (!validarTelefone(contato)) {
+        alert("Informe um CONTATO válido (DDD + telefone, 10 ou 11 dígitos).");
+        return;
+      }
+
+      if (!validadeISO) {
+        alert("Preencha o campo VALIDADE DA PROPOSTA para gerar o PDF.");
+        return;
+      }
+
+      // Valida intervalo entre data atual e validade (até 30 dias)
+      const hoje = new Date();
+      const validadeDate = new Date(validadeISO + "T00:00:00");
+      const diffMs = validadeDate - new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
+      const diffDias = diffMs / (1000 * 60 * 60 * 24);
+
+      if (diffDias < 0 || diffDias > 30) {
+        alert("A validade da proposta deve estar entre hoje e 30 dias a partir de hoje.");
+        return;
+      }
+
+      // Converte validade para BR
+      const pad = (n) => n.toString().padStart(2, "0");
+      const validadeBR = `${pad(validadeDate.getDate())}/${pad(validadeDate.getMonth() + 1)}/${validadeDate.getFullYear()}`;
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ unit: "pt", format: "a4" });
+
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const marginLeft = 56;
+      let y = 64;
+
+      async function getLogoDataUrl() {
+        return new Promise((resolve) => {
+          const img = new Image();
+          img.src = "komvos_logo.png";
+          img.crossOrigin = "anonymous";
+          img.onload = function () {
+            try {
+              const canvas = document.createElement("canvas");
+              canvas.width = img.width;
+              canvas.height = img.height;
+              const ctx = canvas.getContext("2d");
+              ctx.drawImage(img, 0, 0);
+              const dataUrl = canvas.toDataURL("image/png");
+              resolve(dataUrl);
+            } catch (e) {
+              resolve(null);
+            }
+          };
+          img.onerror = function () {
+            resolve(null);
+          };
+        });
+      }
+
+      const logoDataUrl = await getLogoDataUrl();
+
+      if (logoDataUrl) {
+        const logoWidth = 120;
+        const logoHeight = 35;
+        doc.addImage(logoDataUrl, "PNG", marginLeft, y - 20, logoWidth, logoHeight);
+        y += logoHeight + 10;
+      } else {
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(20);
+        doc.text("KOMVOS", marginLeft, y);
+        y += 18;
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(11);
+        doc.text("Tecnologia que transforma", marginLeft, y);
+        y += 18;
+      }
+
+      y += 10;
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(15);
+      doc.text("Escopo de Treinamento HCM", marginLeft, y);
+      y += 22;
+
+      // Bloco com CLIENTE / CONTATO / DATA / VALIDADE no PDF
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(11);
+      doc.text(`Cliente: ${cliente}`, marginLeft, y);
+      y += 14;
+      doc.text(`Contato: ${contato}`, marginLeft, y);
+      y += 14;
+      doc.text(`Data: ${dataBR}`, marginLeft, y);
+      y += 14;
+      doc.text(`Validade da proposta: ${validadeBR}`, marginLeft, y);
+      y += 20;
+
+      const selectedRoutines = allRoutines.filter(
+        (r) => selectedModules.has(r.modulo) && r.included
+      );
+
+      if (selectedRoutines.length === 0) {
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(12);
+        doc.text(
+          "Nenhuma rotina selecionada no escopo no momento.",
+          marginLeft,
+          y
+        );
+        doc.save("Escopo_Treinamento_HCM.pdf");
+        return;
+      }
+
+      const modulesMap = new Map();
+      selectedRoutines.forEach((r) => {
+        if (!modulesMap.has(r.modulo)) modulesMap.set(r.modulo, new Map());
+        const rotinasMap = modulesMap.get(r.modulo);
+        rotinasMap.set(r.rotina, r.especificacoes);
+      });
+
+      const lineHeight = 14;
+      const maxWidth = pageWidth - marginLeft * 2;
+
+      function ensureSpace(linesNeeded) {
+        const remaining = pageHeight - y - 40;
+        if (remaining < linesNeeded * lineHeight) {
+          doc.addPage();
+          y = 64;
+        }
+      }
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(12);
+
+      for (const [modulo, rotinasMap] of modulesMap.entries()) {
+        ensureSpace(3);
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(13);
+        doc.text(`Módulo: ${modulo}`, marginLeft, y);
+        y += 20;
+
+        for (const [rotina, especificacoes] of rotinasMap.entries()) {
+          ensureSpace(2 + especificacoes.length * 2);
+
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(12);
+          doc.text(`• ${rotina}`, marginLeft + 8, y);
+          y += 16;
+
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(11);
+
+          especificacoes.forEach((esp) => {
+            const wrapped = doc.splitTextToSize(`- ${esp}`, maxWidth);
+            wrapped.forEach((line) => {
+              ensureSpace(1);
+              doc.text(line, marginLeft + 22, y);
+              y += lineHeight;
+            });
+          });
+
+          y += 8;
+        }
+
+        y += 8;
+      }
+
+      doc.save("Escopo_Treinamento_HCM.pdf");
+    }
+
+    document
+      .getElementById("btnGerarPdf")
+      .addEventListener("click", gerarPdfEscopo);
+
+    // ============================================================
+    // 7. INICIALIZA
+    // ============================================================
+    initProposalFields();
+    renderModules();
+  </script>
 </body>
 </html>
