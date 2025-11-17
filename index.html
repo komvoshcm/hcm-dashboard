@@ -1191,9 +1191,9 @@ Jurídico;Integração;Jurídico — Integração;Integração com Adm. de Pesso
       // Data apenas para visualização
       dataHojeEl.value = `${dia}/${mes}/${ano}`;
 
-      // Validade padrão = +14 dias
+      // Validade padrão = +30 dias
       const validadeDefault = new Date(hoje);
-      validadeDefault.setDate(validadeDefault.getDate() + 14);
+      validadeDefault.setDate(validadeDefault.getDate() + 30);
       const vd = String(validadeDefault.getDate()).padStart(2, "0");
       const vm = String(validadeDefault.getMonth() + 1).padStart(2, "0");
       const va = validadeDefault.getFullYear();
